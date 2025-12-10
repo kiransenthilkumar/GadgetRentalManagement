@@ -1,0 +1,226 @@
+{% extends "admin/admin_base.html" %}
+{% block title %}Manage Gadgets{% endblock %}
+
+{% block content %}
+
+<h2 class="text-3xl font-bold mb-8 text-gray-800 tracking-wide">🛠 Manage Gadgets</h2>
+
+<!-- ADD NEW BUTTON -->
+<div class="mb-6">
+    <a href="{{ url_for('admin_add_gadget') }}"
+       class="px-5 py-3 bg-blue-600 text-white font-semibold rounded-lg shadow hover:bg-blue-700 transition">
+       ➕ Add New Gadget
+    </a>
+</div>
+
+{% if gadgets %}
+
+{% set featured = gadgets | selectattr("is_featured") | list %}
+{% set non_featured = gadgets | rejectattr("is_featured") | list %}
+
+<!-- ====================================================== -->
+<!-- ⭐ LISTING TABLE -->
+<!-- ====================================================== -->
+
+<div class="overflow-x-auto shadow-xl rounded-xl border border-gray-200">
+    <table class="min-w-full bg-white text-sm">
+        <thead class="bg-blue-600 text-white">
+            <tr>
+                <th class="py-3 px-4 text-left">ID</th>
+                <th class="py-3 px-4 text-left">Image</th>
+                <th class="py-3 px-4 text-left">Name</th>
+                <th class="py-3 px-4 text-left">Category</th>
+                <th class="py-3 px-4 text-left">Price/Day</th>
+                <th class="py-3 px-4 text-left">Stock</th>
+                <th class="py-3 px-4 text-left">Featured</th>
+                <th class="py-3 px-4 text-left">Active</th>
+                <th class="py-3 px-4 text-left">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <!-- ⭐ FEATURED SECTION -->
+            {% if featured %}
+            <tr class="bg-yellow-50">
+                <td colspan="9" class="py-2 px-4 font-semibold text-yellow-700 text-sm">
+                    ⭐ FEATURED GADGETS
+                </td>
+            </tr>
+
+            {% for gadget in featured %}
+            <tr class="hover:bg-gray-50 transition border-b">
+
+                <!-- ID -->
+                <td class="py-3 px-4 font-semibold text-gray-700">#{{ gadget.id }}</td>
+
+                <!-- IMAGE -->
+                <td class="py-3 px-4">
+                    <img src="{{ gadget.image_url }}"
+                         class="w-14 h-14 object-cover rounded-lg border shadow-sm">
+                </td>
+
+                <!-- NAME -->
+                <td class="py-3 px-4 font-medium text-blue-600">{{ gadget.name }}</td>
+
+                <!-- CATEGORY -->
+                <td class="py-3 px-4 text-gray-700">{{ gadget.category }}</td>
+
+                <!-- PRICE -->
+                <td class="py-3 px-4">₹{{ "%.2f"|format(gadget.price_per_day) }}</td>
+
+                <!-- STOCK BADGE -->
+                <td class="py-3 px-4">
+                    <span class="
+                        px-3 py-1 rounded-full text-xs font-semibold
+                        {% if gadget.stock > 5 %} bg-green-100 text-green-700
+                        {% elif gadget.stock > 0 %} bg-yellow-100 text-yellow-700
+                        {% else %} bg-red-100 text-red-700
+                        {% endif %}
+                    ">
+                        {{ gadget.stock }}
+                    </span>
+                </td>
+
+                <!-- FEATURED BADGE -->
+                <td class="py-3 px-4">
+                    <span class="px-3 py-1 rounded-full bg-yellow-100 text-yellow-700 text-xs font-semibold flex items-center gap-1">
+                         YES
+                    </span>
+                </td>
+
+                <!-- ACTIVE STATUS -->
+                <td class="py-3 px-4">
+                    <span class="
+                        px-3 py-1 rounded-full text-xs font-semibold
+                        {% if gadget.is_active %} bg-green-100 text-green-700
+                        {% else %} bg-red-100 text-red-700
+                        {% endif %}
+                    ">
+                        {{ 'Active' if gadget.is_active else 'Inactive' }}
+                    </span>
+                </td>
+
+                <!-- ACTION BUTTONS -->
+                <td class="py-3 px-4">
+                    <div class="flex items-center gap-4">
+
+                        <!-- Edit -->
+                        <a href="{{ url_for('admin_edit_gadget', gadget_id=gadget.id) }}"
+                           class="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1">
+                           ✏ Edit
+                        </a>
+
+                        <!-- Remove Featured -->
+                        <a href="{{ url_for('admin_toggle_featured', gadget_id=gadget.id) }}"
+                           class="text-yellow-600 hover:text-yellow-800 font-semibold flex items-center gap-1">
+                           ⭐ Remove
+                        </a>
+
+                        <!-- Delete -->
+                        <form action="{{ url_for('admin_delete_gadget', gadget_id=gadget.id) }}" method="POST">
+                            <button type="submit"
+                                onclick="return confirm('Delete {{ gadget.name }}?');"
+                                class="text-red-600 hover:text-red-800 font-semibold flex items-center gap-1">
+                                🗑 Delete
+                            </button>
+                        </form>
+
+                    </div>
+                </td>
+
+            </tr>
+            {% endfor %}
+            {% endif %}
+
+            <!-- 📦 NON-FEATURED SECTION -->
+            <tr class="bg-gray-100">
+                <td colspan="9" class="py-2 px-4 font-semibold text-gray-800 text-sm">
+                    📦 ALL OTHER GADGETS
+                </td>
+            </tr>
+
+            {% for gadget in non_featured %}
+            <tr class="hover:bg-gray-50 transition border-b">
+
+                <td class="py-3 px-4 font-semibold text-gray-700">#{{ gadget.id }}</td>
+
+                <td class="py-3 px-4">
+                    <img src="{{ gadget.image_url }}"
+                         class="w-14 h-14 object-cover rounded-lg border shadow-sm">
+                </td>
+
+                <td class="py-3 px-4 font-medium text-blue-600">{{ gadget.name }}</td>
+
+                <td class="py-3 px-4">{{ gadget.category }}</td>
+
+                <td class="py-3 px-4">₹{{ "%.2f"|format(gadget.price_per_day) }}</td>
+
+                <td class="py-3 px-4">
+                    <span class="
+                        px-3 py-1 rounded-full text-xs font-semibold
+                        {% if gadget.stock > 5 %} bg-green-100 text-green-700
+                        {% elif gadget.stock > 0 %} bg-yellow-100 text-yellow-700
+                        {% else %} bg-red-100 text-red-700
+                        {% endif %}
+                    ">
+                        {{ gadget.stock }}
+                    </span>
+                </td>
+
+                <!-- NOT FEATURED -->
+                <td class="py-3 px-4">
+                    <span class="px-3 py-1 rounded-full bg-gray-200 text-gray-700 text-xs font-semibold">
+                        NO
+                    </span>
+                </td>
+
+                <!-- ACTIVE BADGE -->
+                <td class="py-3 px-4">
+                    <span class="
+                        px-3 py-1 rounded-full text-xs font-semibold
+                        {% if gadget.is_active %} bg-green-100 text-green-700
+                        {% else %} bg-red-100 text-red-700
+                        {% endif %}
+                    ">
+                        {{ 'Active' if gadget.is_active else 'Inactive' }}
+                    </span>
+                </td>
+
+                <!-- ACTION BUTTONS -->
+                <td class="py-3 px-4">
+                    <div class="flex items-center gap-4">
+
+                        <a href="{{ url_for('admin_edit_gadget', gadget_id=gadget.id) }}"
+                           class="text-blue-600 hover:text-blue-800 font-semibold flex items-center gap-1">
+                            ✏ Edit
+                        </a>
+
+                        <a href="{{ url_for('admin_toggle_featured', gadget_id=gadget.id) }}"
+                           class="text-yellow-600 hover:text-yellow-800 font-semibold flex items-center gap-1">
+                            ⭐ Make Featured
+                        </a>
+
+                        <form action="{{ url_for('admin_delete_gadget', gadget_id=gadget.id) }}" method="POST">
+                            <button type="submit"
+                                onclick="return confirm('Delete {{ gadget.name }}?');"
+                                class="text-red-600 hover:text-red-800 font-semibold flex items-center gap-1">
+                                🗑 Delete
+                            </button>
+                        </form>
+
+                    </div>
+                </td>
+
+            </tr>
+            {% endfor %}
+
+        </tbody>
+    </table>
+</div>
+
+{% else %}
+<p class="text-center text-gray-500 text-lg font-medium py-8">No gadgets found.</p>
+{% endif %}
+
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Daily Revenue Report{% endblock %}
+
+{% block content %}
+
+<h2 class="text-3xl font-bold mb-6 text-gray-800">Daily Revenue Report</h2>
+
+<p class="mb-6">
+    <a href="{{ url_for('admin_reports') }}" class="text-blue-600 hover:underline">
+        ← Back to Reports
+    </a>
+</p>
+
+{% if data %}
+<div class="overflow-x-auto">
+    <table class="min-w-full bg-white border border-gray-300 rounded-xl shadow">
+        <thead class="bg-blue-600 text-white">
+            <tr>
+                <th class="py-3 px-4 text-left">Date</th>
+                <th class="py-3 px-4 text-left">Total Orders</th>
+                <th class="py-3 px-4 text-left">Revenue (₹)</th>
+                <th class="py-3 px-4 text-left">Avg Revenue (₹)</th>
+                <th class="py-3 px-4 text-left">Max Order (₹)</th>
+                <th class="py-3 px-4 text-left">Min Order (₹)</th>
+                <th class="py-3 px-4 text-left">Unique Customers</th>
+                <th class="py-3 px-4 text-left">Total Rental Days</th>
+                <th class="py-3 px-4 text-left">Avg Rental Days</th>
+            </tr>
+        </thead>
+
+        <tbody class="divide-y divide-gray-200">
+            {% for row in data %}
+            <tr class="hover:bg-gray-50">
+                <td class="py-3 px-4">{{ row.date }}</td>
+                <td class="py-3 px-4">{{ row.orders }}</td>
+                <td class="py-3 px-4">₹{{ "%.2f"|format(row.revenue) }}</td>
+                <td class="py-3 px-4">₹{{ "%.2f"|format(row.avg_revenue) }}</td>
+                <td class="py-3 px-4">₹{{ "%.2f"|format(row.max_order) }}</td>
+                <td class="py-3 px-4">₹{{ "%.2f"|format(row.min_order) }}</td>
+                <td class="py-3 px-4">{{ row.unique_customers }}</td>
+                <td class="py-3 px-4">{{ row.total_days }}</td>
+                <td class="py-3 px-4">{{ "%.2f"|format(row.avg_days) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% else %}
+<p class="text-center text-gray-600 text-lg mt-10">No daily revenue data found.</p>
+{% endif %}
+
+{% endblock %}

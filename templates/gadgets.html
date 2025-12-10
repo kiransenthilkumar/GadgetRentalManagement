@@ -1,0 +1,66 @@
+{% extends "base.html" %}
+
+{% block title %}Browse Gadgets{% endblock %}
+
+{% block content %}
+    <h2 class="text-2xl font-bold mb-6">Browse Gadgets</h2>
+
+    <form method="GET" action="{{ url_for('gadgets') }}" class="mb-6 p-4 bg-gray-50 rounded-lg shadow-sm flex flex-wrap items-center gap-4">
+        <div>
+            <label for="category" class="font-semibold mr-2">Category:</label>
+            <select id="category" name="category" onchange="this.form.submit()" class="p-2 border rounded-md">
+                <option value="">All Categories</option>
+                {% for cat in categories %}
+                    <option value="{{ cat }}" {% if selected_category == cat %}selected{% endif %}>{{ cat }}</option>
+                {% endfor %}
+            </select>
+        </div>
+
+        <div>
+            <label for="search" class="font-semibold mr-2">Search:</label>
+            <input type="text" id="search" name="search" value="{{ search_query or '' }}" placeholder="Search by name" class="p-2 border rounded-md">
+        </div>
+
+        <div>
+            <label for="min_price" class="font-semibold mr-2">Min Price:</label>
+            <input type="number" id="min_price" name="min_price" value="{{ min_price or '' }}" step="any" class="p-2 border rounded-md w-28">
+        </div>
+
+        <div>
+            <label for="max_price" class="font-semibold mr-2">Max Price:</label>
+            <input type="number" id="max_price" name="max_price" value="{{ max_price or '' }}" step="any" class="p-2 border rounded-md w-28">
+        </div>
+
+        <div>
+            <label for="sort_by" class="font-semibold mr-2">Sort By:</label>
+            <select id="sort_by" name="sort_by" onchange="this.form.submit()" class="p-2 border rounded-md">
+                <option value="popularity" {% if sort_by == 'popularity' %}selected{% endif %}>Popularity</option>
+                <option value="price_low_high" {% if sort_by == 'price_low_high' %}selected{% endif %}>Price (Low to High)</option>
+                <option value="newest" {% if sort_by == 'newest' %}selected{% endif %}>Newest</option>
+            </select>
+        </div>
+
+        <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded-md hover:bg-blue-600">Apply Filters/Sort</button>
+    </form>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+        {% if gadgets %}
+            {% for gadget in gadgets %}
+                <div class="gadget-card bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                    <img src="{{ url_for('static', filename='default_gadget.png') }}" alt="{{ gadget.name }}" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-xl font-semibold mb-1"><a href="{{ url_for('gadget_detail', gadget_id=gadget.id) }}" class="text-blue-600 hover:underline">{{ gadget.name }}</a></h3>
+                        <p class="text-gray-600 text-sm mb-2">Category: {{ gadget.category }}</p>
+                        <p class="text-lg font-bold text-gray-800 mb-2">₹{{ "%.2f"|format(gadget.price_per_day) }}/day</p>
+                        <p class="text-yellow-500 mb-3">Rating: ⭐{{ "%.1f"|format(gadget.avg_rating) }}</p>
+                        {% if current_user.is_authenticated %}
+                            <p><a href="{{ url_for('add_to_wishlist', gadget_id=gadget.id) }}" class="text-purple-600 hover:underline text-sm">Add to Wishlist</a></p>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p class="col-span-full text-center text-gray-600 text-lg">No gadgets found matching your criteria.</p>
+        {% endif %}
+    </div>
+{% endblock %}

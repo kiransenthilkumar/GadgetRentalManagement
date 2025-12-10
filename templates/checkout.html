@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Checkout{% endblock %}
+
+{% block content %}
+<h2 class="text-2xl font-bold mb-6">Checkout</h2>
+
+<!-- Flash messages already handled by base.html -->
+
+<h3 class="text-xl font-semibold mb-4">Your Order Summary</h3>
+
+<div class="overflow-x-auto mb-6">
+    <table class="min-w-full bg-white border border-gray-300 rounded-lg overflow-hidden">
+        <thead class="bg-gray-100">
+            <tr>
+                <th class="py-2 px-4 border-b text-left font-semibold">Gadget</th>
+                <th class="py-2 px-4 border-b text-left font-semibold">Dates</th>
+                <th class="py-2 px-4 border-b text-left font-semibold">Qty</th>
+                <th class="py-2 px-4 border-b text-left font-semibold">Price/Day</th>
+                <th class="py-2 px-4 border-b text-left font-semibold">Subtotal</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in cart_items %}
+            <tr class="hover:bg-gray-50">
+                <td class="py-2 px-4 border-b">{{ item.gadget.name }}</td>
+                <td class="py-2 px-4 border-b">
+                    {{ item.start_date.strftime('%Y-%m-%d') }} →
+                    {{ item.end_date.strftime('%Y-%m-%d') }}
+                </td>
+                <td class="py-2 px-4 border-b">{{ item.quantity }}</td>
+                <td class="py-2 px-4 border-b">₹{{ "%.2f"|format(item.gadget.price_per_day) }}</td>
+                <td class="py-2 px-4 border-b font-semibold">₹{{ "%.2f"|format(item.subtotal) }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="space-y-2 text-lg">
+    <p><strong>Total Rental Price:</strong> ₹{{ "%.2f"|format(total_rental_price) }}</p>
+    <p><strong>Security Deposit:</strong> ₹{{ "%.2f"|format(total_deposit) }}</p>
+
+    {% if promo_code_applied %}
+    <p>
+        <strong>Promo Code ({{ promo_code_applied }}):</strong>
+        <span class="text-red-600 font-semibold">- ₹{{ "%.2f"|format(discount_amount) }}</span>
+    </p>
+    {% else %}
+    <p><strong>Discount:</strong> - ₹0.00</p>
+    {% endif %}
+
+    <h3 class="text-xl font-bold mt-4">
+        Total Payable: <span class="text-blue-600">₹{{ "%.2f"|format(final_total_payable) }}</span>
+    </h3>
+</div>
+
+<form method="POST" action="{{ url_for('checkout') }}" class="mt-8">
+
+    <!-- Keep applied promo code + discount -->
+    <input type="hidden" name="promo_code_applied" value="{{ promo_code_applied or '' }}">
+    <input type="hidden" name="discount_amount" value="{{ discount_amount or 0.0 }}">
+
+    <h3 class="text-xl font-semibold mb-3">Delivery Information</h3>
+
+    <label for="address" class="block text-gray-700 text-sm font-bold mb-2">Delivery Address:</label>
+
+    <textarea
+        id="address"
+        name="address"
+        rows="4"
+        class="border rounded w-full p-3 text-gray-700 focus:outline-none focus:ring-2 focus:ring-blue-400"
+        required
+    >{{ user.address or '' }}</textarea>
+
+    <button
+        type="submit"
+        class="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition mt-4 w-full"
+    >
+        Place Order
+    </button>
+</form>
+
+<p class="mt-6 text-center">
+    <a href="{{ url_for('cart') }}" class="text-blue-600 hover:underline">← Back to Cart</a>
+</p>
+
+{% endblock %}

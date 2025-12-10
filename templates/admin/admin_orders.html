@@ -1,0 +1,143 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Manage Orders{% endblock %}
+
+{% block content %}
+<h2 class="text-3xl font-bold mb-8 text-gray-800 tracking-wide">📦 Manage Orders</h2>
+
+<!-- FILTER BAR -->
+<div class="mb-8">
+    <form method="GET" action="{{ url_for('admin_orders') }}"
+          class="bg-white shadow-md rounded-xl p-5 flex items-center gap-4 border border-gray-200">
+
+        <label class="font-semibold text-gray-700">Filter by Status:</label>
+        <select id="status" name="status"
+            onchange="this.form.submit()"
+            class="p-2 border rounded-lg bg-gray-50 focus:ring focus:ring-blue-300">
+            <option value="all" {% if selected_status == 'all' or selected_status is none %}selected{% endif %}>All</option>
+            <option value="booked" {% if selected_status == 'booked' %}selected{% endif %}>Booked</option>
+            <option value="approved" {% if selected_status == 'approved' %}selected{% endif %}>Approved</option>
+            <option value="active" {% if selected_status == 'active' %}selected{% endif %}>Active</option>
+            <option value="delivered" {% if selected_status == 'delivered' %}selected{% endif %}>Delivered</option>
+            <option value="returned" {% if selected_status == 'returned' %}selected{% endif %}>Returned</option>
+            <option value="cancelled" {% if selected_status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+        </select>
+    </form>
+</div>
+
+{% if orders %}
+<div class="overflow-x-auto shadow-xl rounded-xl border border-gray-200">
+    <table class="min-w-full bg-white text-sm">
+        <thead class="bg-blue-600 text-white">
+            <tr>
+                <th class="py-3 px-4 text-left">Order ID</th>
+                <th class="py-3 px-4 text-left">User</th>
+                <th class="py-3 px-4 text-left">Gadget</th>
+                <th class="py-3 px-4 text-left">Dates</th>
+                <th class="py-3 px-4 text-left">Total</th>
+                <th class="py-3 px-4 text-left">Status</th>
+                <th class="py-3 px-4 text-left">Payment</th>
+                <th class="py-3 px-4 text-left">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for order in orders %}
+            <tr class="hover:bg-gray-50 transition border-b">
+                <td class="py-3 px-4 font-semibold text-gray-700">#{{ order.id }}</td>
+
+                <td class="py-3 px-4 text-gray-600">
+                    {{ order.user.name }}<br>
+                    <span class="text-xs text-gray-400">{{ order.user.email }}</span>
+                </td>
+
+                <td class="py-3 px-4 text-blue-600">
+                    <a href="{{ url_for('gadget_detail', gadget_id=order.gadget.id) }}"
+                       class="hover:underline font-medium">
+                        {{ order.gadget.name }}
+                    </a>
+                </td>
+
+                <td class="py-3 px-4 text-gray-600">
+                    {{ order.start_date }} → {{ order.end_date }}<br>
+                    <span class="text-xs text-gray-400">({{ order.total_days }} days)</span>
+                </td>
+
+                <td class="py-3 px-4 font-semibold text-gray-700">
+                    ₹{{ "%.2f"|format(order.total_price) }}
+                </td>
+
+                <!-- STATUS BADGE -->
+                <td class="py-3 px-4">
+                    <span class="
+                        px-3 py-1 rounded-full text-xs font-semibold
+                        {% if order.status == 'booked' %} bg-blue-100 text-blue-700
+                        {% elif order.status == 'approved' %} bg-green-100 text-green-700
+                        {% elif order.status == 'active' %} bg-indigo-100 text-indigo-700
+                        {% elif order.status == 'delivered' %} bg-purple-100 text-purple-700
+                        {% elif order.status == 'returned' %} bg-gray-200 text-gray-700
+                        {% elif order.status == 'cancelled' %} bg-red-100 text-red-700
+                        {% endif %}
+                    ">
+                        {{ order.status.capitalize() }}
+                    </span>
+                </td>
+
+                <!-- PAYMENT STATUS -->
+                <td class="py-3 px-4">
+                    <span class="
+                        px-3 py-1 rounded-full text-xs font-semibold
+                        {% if order.payment_status == 'paid' %} bg-green-100 text-green-700
+                        {% else %} bg-yellow-100 text-yellow-700
+                        {% endif %}
+                    ">
+                        {{ order.payment_status.capitalize() }}
+                    </span>
+                </td>
+
+                <!-- ACTION BUTTONS -->
+                <td class="py-3 px-4">
+                    <div class="flex flex-wrap gap-2">
+
+                        {% if order.status == 'booked' %}
+                            <a href="{{ url_for('admin_approve_order', order_id=order.id) }}"
+                            class="text-green-600 hover:underline font-medium">Approve</a>
+
+                            <a href="{{ url_for('admin_reject_order', order_id=order.id) }}"
+                            class="text-red-600 hover:underline font-medium">Reject</a>
+
+                        {% elif order.status == 'approved' %}
+                            <a href="{{ url_for('admin_mark_active', order_id=order.id) }}"
+                               class="text-indigo-600 hover:underline font-medium">Mark Active</a>
+
+                        {% elif order.status == 'active' %}
+                            <a href="{{ url_for('admin_mark_delivered', order_id=order.id) }}"
+                               class="text-purple-600 hover:underline font-medium">Mark Delivered</a>
+
+                        {% elif order.status == 'delivered' %}
+                            <a href="{{ url_for('admin_mark_returned', order_id=order.id) }}"
+                               class="text-gray-700 hover:underline font-medium">Mark Returned</a>
+
+                        {% elif order.status == 'returned' and not order.deposit_returned %}
+                            <a href="{{ url_for('admin_refund_deposit', order_id=order.id) }}"
+                               class="text-blue-600 hover:underline font-medium">Refund Deposit</a>
+                        {% endif %}
+
+                        {% if order.status not in ["cancelled", "returned"] %}
+                            <a href="{{ url_for('admin_cancel_order', order_id=order.id) }}"
+                               class="text-red-700 hover:underline font-medium">Cancel</a>
+                        {% endif %}
+                    </div>
+                </td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% else %}
+<p class="text-center text-gray-600 text-lg font-medium py-8">No orders found.</p>
+{% endif %}
+
+{% endblock %}

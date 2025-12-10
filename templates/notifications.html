@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}My Notifications{% endblock %}
+
+{% block content %}
+
+<h2 class="text-3xl font-bold mb-6 text-gray-800">My Notifications</h2>
+
+{% if notifications %}
+
+<div class="space-y-4">
+
+    {% for notification in notifications %}
+    <div class="
+        p-5 rounded-xl shadow-md border transition 
+        {% if not notification.is_read %}
+            bg-blue-50 border-blue-300 hover:bg-blue-100
+        {% else %}
+            bg-gray-50 border-gray-200 hover:bg-gray-100
+        {% endif %}
+    ">
+
+        <!-- Message -->
+        <p class="text-gray-800 text-lg font-medium">
+            {{ notification.message }}
+        </p>
+
+        <!-- Date -->
+        <p class="text-sm text-gray-500 mt-1">
+            {{ notification.created_at.strftime('%Y-%m-%d %H:%M') }}
+        </p>
+
+        <!-- "Mark as Read" button -->
+        {% if not notification.is_read %}
+        <div class="mt-3">
+            <a href="{{ url_for('mark_notification_read', notification_id=notification.id) }}"
+               class="inline-block text-blue-700 font-semibold text-sm px-3 py-1 rounded-full
+                      border border-blue-500 hover:bg-blue-600 hover:text-white transition">
+                Mark as Read
+            </a>
+        </div>
+        {% endif %}
+
+    </div>
+    {% endfor %}
+
+</div>
+
+{% else %}
+
+<!-- Empty State -->
+<div class="bg-white p-10 rounded-xl border shadow-md text-center">
+    <img src="https://cdn-icons-png.flaticon.com/512/4076/4076500.png" 
+         class="w-20 mx-auto opacity-70 mb-4">
+    <p class="text-gray-600 text-lg">You have no notifications yet.</p>
+</div>
+
+{% endif %}
+
+{% endblock %}

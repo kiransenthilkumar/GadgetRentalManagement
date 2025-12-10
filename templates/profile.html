@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}User Profile{% endblock %}
+
+{% block content %}
+
+<div class="max-w-3xl mx-auto">
+
+    <!-- Page Title -->
+    <h2 class="text-4xl font-extrabold mb-8 text-gray-800 text-center">
+        Your Profile
+    </h2>
+
+    <!-- Profile Card -->
+    <div class="bg-white/90 backdrop-blur shadow-xl rounded-2xl border border-gray-200 p-8">
+
+        <form method="POST" action="{{ url_for('profile') }}" class="space-y-6">
+
+            <!-- NAME -->
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1" for="name">
+                    Full Name
+                </label>
+                <input
+                    type="text"
+                    id="name"
+                    name="name"
+                    value="{{ user.name }}"
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-blue-400 focus:ring-2 transition"
+                    required
+                >
+            </div>
+
+            <!-- EMAIL -->
+            <div>
+                <label class="block text-gray-700 font-semibold mb-1" for="email">
+                    Email Address
+                </label>
+                <input
+                    type="email"
+                    id="email"
+                    name="email"
+                    value="{{ user.email }}"
+                    class="w-full px-4 py-3 rounded-lg border border-gray-300 bg-gray-100 cursor-not-allowed"
+                    readonly
+                >
+                <p class="text-xs text-gray-500 mt-1">
+                    Email cannot be changed for security reasons.
+                </p>
+            </div>
+
+            <!-- PHONE + ADDRESS -->
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+                <!-- PHONE -->
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1" for="phone">
+                        Phone Number
+                    </label>
+                    <input
+                        type="text"
+                        id="phone"
+                        name="phone"
+                        value="{{ user.phone or '' }}"
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-blue-400 focus:ring-2 transition"
+                    >
+                </div>
+
+                <!-- ADDRESS -->
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-1" for="address">
+                        Address
+                    </label>
+                    <textarea
+                        id="address"
+                        name="address"
+                        rows="3"
+                        class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:border-blue-500 focus:ring-blue-400 focus:ring-2 transition"
+                    >{{ user.address or '' }}</textarea>
+                </div>
+
+            </div>
+
+            <!-- SAVE BUTTON -->
+            <div class="text-center">
+                <button
+                    type="submit"
+                    class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg text-lg font-semibold shadow-md hover:shadow-lg transition"
+                >
+                    Save Changes
+                </button>
+            </div>
+
+        </form>
+
+        <!-- FEEDBACK BUTTON -->
+        <div class="text-center mt-8">
+            <a href="{{ url_for('feedback') }}"
+               class="inline-block bg-purple-600 hover:bg-purple-700 text-white px-8 py-3 rounded-lg text-lg font-semibold shadow-md hover:shadow-lg transition">
+                ⭐ Give Feedback
+            </a>
+        </div>
+
+    </div>
+
+    <!-- Back to home -->
+    <p class="mt-6 text-center">
+        <a href="{{ url_for('home') }}"
+           class="text-blue-600 hover:underline text-lg font-medium">
+            ← Back to Home
+        </a>
+    </p>
+
+</div>
+
+{% endblock %}

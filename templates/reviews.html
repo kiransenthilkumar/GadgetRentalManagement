@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block title %}All Reviews{% endblock %}
+
+{% block content %}
+    <h2 class="text-2xl font-bold mb-6">All Reviews</h2>
+
+    {% if reviews %}
+        <div class="space-y-6">
+            {% for review in reviews %}
+                <div class="bg-white border border-gray-200 rounded-lg shadow-md p-6">
+                    <h3 class="text-xl font-semibold mb-2">Gadget: <a href="{{ url_for('gadget_detail', gadget_id=review.gadget.id) }}" class="text-blue-600 hover:underline">{{ review.gadget.name }}</a></h3>
+                    <p class="text-gray-700 mb-1"><strong>Reviewer:</strong> {{ review.user.name }}</p>
+                    <p class="text-yellow-500 text-lg mb-2"><strong>Rating:</strong> ⭐{{ review.rating }}</p>
+                    <p class="text-gray-800 mb-3"><strong>Comment:</strong> "{{ review.comment }}"</p>
+                    <p class="text-sm text-gray-500"><em>Reviewed on: {{ review.created_at.strftime('%Y-%m-%d %H:%M') }}</em></p>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center text-gray-600 text-lg">No reviews available yet.</p>
+    {% endif %}
+{% endblock %}

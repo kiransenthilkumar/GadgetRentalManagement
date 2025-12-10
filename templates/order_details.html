@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+{% block title %}Order Details - {{ order.id }}{% endblock %}
+
+{% block content %}
+
+<!-- HEADER -->
+<div class="flex flex-wrap items-center justify-between mb-8">
+    <h2 class="text-3xl font-bold text-gray-800">
+        Order <span class="text-blue-600">#{{ order.id }}</span>
+    </h2>
+
+    <span class="px-4 py-2 text-sm rounded-full shadow-sm
+        {% if order.status == 'approved' %} bg-green-100 text-green-700
+        {% elif order.status == 'cancelled' %} bg-red-100 text-red-700
+        {% elif order.status == 'active' %} bg-blue-100 text-blue-700
+        {% elif order.status == 'returned' %} bg-purple-100 text-purple-700
+        {% else %} bg-orange-100 text-orange-600 {% endif %}
+    ">
+        {{ order.status|capitalize }}
+    </span>
+</div>
+
+<!-- GRID LAYOUT -->
+<div class="grid grid-cols-1 md:grid-cols-2 gap-10">
+
+    <!-- GADGET INFORMATION -->
+    <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition p-6 border border-gray-200">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <i class="fa-solid fa-microchip text-blue-500 mr-2"></i> Gadget Information
+        </h3>
+
+        <div class="flex items-center space-x-6">
+            <img src="{{ order.gadget.image }}" 
+                 alt="{{ order.gadget.name }}"
+                 class="w-36 h-36 object-cover rounded-lg border shadow-sm">
+
+            <div class="space-y-1">
+                <a href="{{ url_for('gadget_detail', gadget_id=order.gadget.id) }}"
+                   class="text-2xl font-bold text-blue-600 hover:underline">
+                    {{ order.gadget.name }}
+                </a>
+                <p class="text-gray-600">{{ order.gadget.category }}</p>
+                <p class="text-gray-700 font-medium">
+                    ₹{{ "%.2f"|format(order.gadget.price_per_day) }} <span class="text-sm text-gray-500">/day</span>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ORDER SUMMARY -->
+    <div class="bg-white rounded-xl shadow-md hover:shadow-lg transition p-6 border border-gray-200">
+        <h3 class="text-xl font-semibold text-gray-800 mb-4 flex items-center">
+            <i class="fa-solid fa-file-invoice text-blue-500 mr-2"></i> Order Summary
+        </h3>
+
+        <div class="space-y-4 text-gray-700">
+
+            <!-- Dates -->
+            <p>
+                <strong class="text-gray-800">Rental Dates:</strong><br>
+                <span class="text-blue-600 font-semibold">
+                    {{ order.start_date.strftime('%Y-%m-%d') }} → {{ order.end_date.strftime('%Y-%m-%d') }}
+                </span>
+                <span class="text-sm text-gray-500">({{ order.total_days }} days)</span>
+            </p>
+
+            <!-- Price -->
+            <p>
+                <strong class="text-gray-800">Total Rental Cost:</strong><br>
+                <span class="text-2xl font-bold text-gray-900">
+                    ₹{{ "%.2f"|format(order.total_price) }}
+                </span>
+            </p>
+
+            <!-- Deposit -->
+            {% if order.security_deposit > 0 %}
+            <p>
+                <strong class="text-gray-800">Security Deposit:</strong><br>
+                <span class="text-gray-900 font-semibold">
+                    ₹{{ "%.2f"|format(order.security_deposit) }}
+                </span>
+
+                <span class="ml-2 px-3 py-1 rounded-full text-xs shadow-sm
+                    {% if order.deposit_returned %}
+                        bg-green-100 text-green-700
+                    {% else %}
+                        bg-orange-100 text-orange-600
+                    {% endif %}
+                ">
+                    {% if order.deposit_returned %} Refunded {% else %} Pending Refund {% endif %}
+                </span>
+            </p>
+            {% endif %}
+
+            <!-- Payment Status -->
+            <p>
+                <strong class="text-gray-800">Payment Status:</strong><br>
+                <span class="font-semibold
+                    {% if order.payment_status == 'paid' %}
+                        text-green-600
+                    {% else %}
+                        text-orange-600
+                    {% endif %}
+                ">
+                    {{ order.payment_status|capitalize }}
+                </span>
+            </p>
+
+            <!-- Transaction ID -->
+            {% if order.transaction_id %}
+            <p>
+                <strong class="text-gray-800">Transaction ID:</strong><br>
+                <span class="text-gray-800">{{ order.transaction_id }}</span>
+            </p>
+            {% endif %}
+
+            <!-- Ordered On -->
+            <p>
+                <strong class="text-gray-800">Ordered On:</strong><br>
+                {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}
+            </p>
+        </div>
+    </div>
+
+</div>
+
+<!-- ACTION BUTTONS -->
+<div class="mt-10 space-y-6">
+
+    {% if order.status == 'booked' and order.start_date > today %}
+    <a href="{{ url_for('cancel_order', order_id=order.id) }}"
+       onclick="return confirm('Are you sure you want to cancel this order?');"
+       class="bg-red-600 text-white px-6 py-3 rounded-lg shadow hover:bg-red-700 transition block w-fit">
+        Cancel Order
+    </a>
+
+    {% elif order.status == 'returned' and not order.deposit_returned %}
+    <div class="px-5 py-3 bg-orange-100 text-orange-700 rounded-lg font-semibold shadow w-fit">
+        Deposit refund is pending
+    </div>
+
+    {% elif order.status == 'returned' and order.deposit_returned %}
+    <div class="px-5 py-3 bg-green-100 text-green-700 rounded-lg font-semibold shadow w-fit">
+        Deposit refunded successfully!
+    </div>
+
+    <a href="{{ url_for('submit_review', order_id=order.id) }}"
+       class="bg-green-600 text-white px-6 py-3 rounded-lg shadow hover:bg-green-700 transition block w-fit">
+        Submit Review
+    </a>
+    {% endif %}
+
+    <a href="{{ url_for('orders') }}" 
+       class="text-blue-600 hover:underline font-medium block">
+        ← Back to My Orders
+    </a>
+
+</div>
+
+{% endblock %}

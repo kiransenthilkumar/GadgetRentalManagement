@@ -1,0 +1,56 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Most Rented Gadgets{% endblock %}
+
+{% block content %}
+
+<h2 class="text-3xl font-bold mb-6 text-gray-800">Most Rented Gadgets Report</h2>
+
+<p class="mb-6">
+    <a href="{{ url_for('admin_reports') }}" class="text-blue-600 hover:underline">
+        ← Back to Reports
+    </a>
+</p>
+
+{% if data %}
+<div class="overflow-x-auto">
+    <table class="min-w-full bg-white border border-gray-300 rounded-xl shadow">
+        <thead class="bg-blue-600 text-white">
+            <tr>
+                <th class="py-3 px-4 text-left">Gadget</th>
+                <th class="py-3 px-4 text-left">Category</th>
+                <th class="py-3 px-4 text-left">Total Rentals</th>
+                <th class="py-3 px-4 text-left">Total Rental Days</th>
+                <th class="py-3 px-4 text-left">Unique Users</th>
+                <th class="py-3 px-4 text-left">Total Revenue (₹)</th>
+                <th class="py-3 px-4 text-left">Avg Revenue (₹)</th>
+                <th class="py-3 px-4 text-left">Avg Days</th>
+                <th class="py-3 px-4 text-left">Last Rented</th>
+            </tr>
+        </thead>
+
+        <tbody class="divide-y divide-gray-200">
+            {% for row in data %}
+            <tr class="hover:bg-gray-50">
+                <td class="py-3 px-4">{{ row.gadget }}</td>
+                <td class="py-3 px-4">{{ row.category }}</td>
+                <td class="py-3 px-4">{{ row.total_rentals }}</td>
+                <td class="py-3 px-4">{{ row.total_days }}</td>
+                <td class="py-3 px-4">{{ row.unique_users }}</td>
+                <td class="py-3 px-4">₹{{ "%.2f"|format(row.total_revenue) }}</td>
+                <td class="py-3 px-4">₹{{ "%.2f"|format(row.avg_revenue) }}</td>
+                <td class="py-3 px-4">{{ "%.2f"|format(row.avg_days) }}</td>
+                <td class="py-3 px-4">
+                    {% if row.last_rented %} {{ row.last_rented.strftime('%Y-%m-%d') }} {% else %}-{% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% else %}
+<p class="text-center text-gray-600 text-lg mt-10">No data available.</p>
+{% endif %}
+
+{% endblock %}

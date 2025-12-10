@@ -1,0 +1,104 @@
+{% extends "base.html" %}
+
+{% block title %}{{ gadget.name }}{% endblock %}
+
+{% block content %}
+<div class="flex flex-col md:flex-row gap-8">
+
+    <!-- LEFT: Gadget Info -->
+    <div class="md:w-1/2">
+        <h2 class="text-3xl font-bold mb-4">{{ gadget.name }}</h2>
+
+        <!-- IMAGE (dynamic: uploaded > default > fallback) -->
+        <img 
+            src="{{ gadget.image or url_for('static', filename='default_gadget.png') }}"
+            alt="{{ gadget.name }}"
+            onerror="this.src='/static/default_gadget.png';"
+            class="w-full h-80 object-cover rounded-lg shadow-md mb-6"
+        >
+
+        <p class="mb-2"><strong class="font-semibold">Category:</strong>
+            <span class="text-gray-700">{{ gadget.category }}</span>
+        </p>
+
+        <p class="mb-4">
+            <strong class="font-semibold">Description:</strong>
+            <span class="text-gray-700">{{ gadget.description or 'No description available.' }}</span>
+        </p>
+
+        <p class="text-2xl font-bold text-blue-600 mb-4">
+            Price per day: ₹{{ "%.2f"|format(gadget.price_per_day) }}
+        </p>
+
+        <p class="mb-2"><strong class="font-semibold">Stock:</strong>
+            <span class="text-gray-700">{{ gadget.stock }} items available</span>
+        </p>
+
+        <p class="mb-6">
+            <strong class="font-semibold">Average Rating:</strong>
+            <span class="text-yellow-500">⭐{{ "%.1f"|format(gadget.avg_rating) }}</span>
+            ({{ gadget.rental_count }} rentals)
+        </p>
+
+        <!-- RENTAL FORM -->
+        <h3 class="text-xl font-semibold mb-4">Rental Dates</h3>
+
+        <form method="POST" action="{{ url_for('add_to_cart', gadget_id=gadget.id) }}" class="space-y-4">
+            <div>
+                <label for="start_date" class="block text-gray-700 text-sm font-bold mb-2">Start Date:</label>
+                <input type="date" id="start_date" name="start_date"
+                       class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
+                       required>
+            </div>
+
+            <div>
+                <label for="end_date" class="block text-gray-700 text-sm font-bold mb-2">End Date:</label>
+                <input type="date" id="end_date" name="end_date"
+                       class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 focus:outline-none focus:shadow-outline"
+                       required>
+            </div>
+
+            <button type="submit"
+                    class="bg-blue-500 text-white px-6 py-3 rounded hover:bg-blue-600 font-bold text-lg w-full">
+                Add to Cart
+            </button>
+        </form>
+
+        {% if current_user.is_authenticated %}
+        <p class="mt-4 text-center">
+            <a href="{{ url_for('add_to_wishlist', gadget_id=gadget.id) }}"
+               class="text-blue-500 hover:underline">
+               Add to Wishlist
+            </a>
+        </p>
+        {% endif %}
+
+        <p class="mt-6 text-center">
+            <a href="{{ url_for('gadgets') }}" class="text-blue-500 hover:underline">Back to Gadgets</a>
+        </p>
+    </div>
+
+    <!-- RIGHT: Reviews -->
+    <div class="md:w-1/2">
+        <h3 class="text-2xl font-bold mb-4">Reviews</h3>
+
+        {% if reviews %}
+        <div class="space-y-4">
+            {% for review in reviews %}
+            <div class="bg-gray-50 p-4 rounded-lg shadow-sm border border-gray-200">
+                <p class="text-gray-800">
+                    <strong>{{ review.user.name }}</strong> rated 
+                    <span class="text-yellow-500">⭐{{ review.rating }}</span>
+                    on <span class="text-gray-600">{{ review.created_at.strftime('%Y-%m-%d') }}</span>
+                </p>
+
+                <p class="mt-2 text-gray-700">"{{ review.comment }}"</p>
+            </div>
+            {% endfor %}
+        </div>
+        {% else %}
+        <p class="text-gray-600">No reviews yet for this gadget.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

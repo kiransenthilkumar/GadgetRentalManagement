@@ -1,0 +1,128 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Manage Users{% endblock %}
+
+{% block content %}
+
+<h2 class="text-3xl font-bold mb-8 text-gray-800 tracking-wide">👥 Manage Users</h2>
+
+<!-- FLASH MESSAGES -->
+{% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+        {% for category, message in messages %}
+            <div class="p-4 mb-4 rounded-lg text-white
+                {% if category == 'success' %} bg-green-600
+                {% elif category == 'danger' %} bg-red-600
+                {% else %} bg-blue-600
+                {% endif %}
+            ">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+{% endwith %}
+
+{% if users %}
+<div class="overflow-x-auto shadow-xl rounded-xl border border-gray-200">
+    <table class="min-w-full bg-white text-sm">
+        <thead class="bg-blue-600 text-white">
+            <tr>
+                <th class="py-3 px-4 text-left">ID</th>
+                <th class="py-3 px-4 text-left">Name</th>
+                <th class="py-3 px-4 text-left">Email</th>
+                <th class="py-3 px-4 text-left">Phone</th>
+                <th class="py-3 px-4 text-left">Admin</th>
+                <th class="py-3 px-4 text-left">Verified</th>
+                <th class="py-3 px-4 text-left">Active</th>
+                <th class="py-3 px-4 text-left">Actions</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            {% for user in users %}
+            <tr class="hover:bg-gray-50 transition border-b">
+
+                <!-- ID -->
+                <td class="py-3 px-4 font-semibold text-gray-700">
+                    #{{ user.id }}
+                </td>
+
+                <!-- NAME -->
+                <td class="py-3 px-4 text-gray-800 font-medium">{{ user.name }}</td>
+
+                <!-- EMAIL -->
+                <td class="py-3 px-4 text-gray-700">{{ user.email }}</td>
+
+                <!-- PHONE -->
+                <td class="py-3 px-4 text-gray-600">{{ user.phone or "N/A" }}</td>
+
+                <!-- ADMIN BADGE -->
+                <td class="py-3 px-4">
+                    <span class="
+                        px-3 py-1 rounded-full text-xs font-semibold
+                        {% if user.is_admin %} bg-purple-100 text-purple-700
+                        {% else %} bg-gray-200 text-gray-600
+                        {% endif %}
+                    ">
+                        {{ "Admin" if user.is_admin else "User" }}
+                    </span>
+                </td>
+
+                <!-- VERIFIED BADGE -->
+                <td class="py-3 px-4">
+                    <span class="
+                        px-3 py-1 rounded-full text-xs font-semibold
+                        {% if user.is_verified %} bg-green-100 text-green-700
+                        {% else %} bg-yellow-100 text-yellow-700
+                        {% endif %}
+                    ">
+                        {{ "Verified" if user.is_verified else "Not Verified" }}
+                    </span>
+                </td>
+
+                <!-- ACTIVE BADGE -->
+                <td class="py-3 px-4">
+                    <span class="
+                        px-3 py-1 rounded-full text-xs font-semibold
+                        {% if user.is_active %} bg-green-100 text-green-700
+                        {% else %} bg-red-100 text-red-700
+                        {% endif %}
+                    ">
+                        {{ "Active" if user.is_active else "Inactive" }}
+                    </span>
+                </td>
+
+                <!-- ACTION BUTTONS -->
+                <td class="py-3 px-4">
+                    <div class="flex flex-wrap gap-3">
+
+                        <a href="{{ url_for('admin_user_rental_history', user_id=user.id) }}"
+                           class="text-blue-600 hover:underline font-medium">📜 History</a>
+
+                        {% if not user.is_verified %}
+                        <a href="{{ url_for('admin_mark_user_verified', user_id=user.id) }}"
+                           class="text-green-600 hover:underline font-medium">✔ Verify</a>
+                        {% endif %}
+
+                        {% if user.is_active %}
+                        <a href="{{ url_for('admin_deactivate_user', user_id=user.id) }}"
+                           onclick="return confirm('Deactivate this user?');"
+                           class="text-red-600 hover:underline font-medium">⛔ Deactivate</a>
+                        {% else %}
+                        <span class="text-gray-500 font-medium">Inactive</span>
+                        {% endif %}
+
+                    </div>
+                </td>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% else %}
+<p class="text-center text-gray-500 text-lg font-medium py-8">No users found.</p>
+{% endif %}
+
+{% endblock %}

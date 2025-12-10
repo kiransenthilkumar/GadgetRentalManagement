@@ -1,0 +1,126 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}User Rental History - {{ user.name }}{% endblock %}
+
+{% block content %}
+
+<!-- Header Section -->
+<div class="flex items-center justify-between mb-6">
+    <h2 class="text-3xl font-bold">
+        Rental History —
+        <span class="text-blue-600">{{ user.name }}</span>
+        <span class="text-gray-500 text-lg">({{ user.email }})</span>
+    </h2>
+
+    <a href="{{ url_for('admin_users') }}"
+       class="px-4 py-2 bg-blue-500 text-white rounded-lg shadow hover:bg-blue-600 transition flex items-center space-x-2">
+        <i data-feather="arrow-left"></i>
+        <span>Back to Users</span>
+    </a>
+</div>
+
+<!-- Card Summary -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+    <div class="p-5 bg-white rounded-xl shadow border border-blue-100">
+        <p class="text-gray-500 text-sm">Total Orders</p>
+        <p class="text-3xl font-bold text-blue-600">{{ orders|length }}</p>
+    </div>
+
+    <div class="p-5 bg-white rounded-xl shadow border border-blue-100">
+        <p class="text-gray-500 text-sm">Completed Orders</p>
+        <p class="text-3xl font-bold text-green-600">
+            {{ orders|selectattr("status", "equalto", "returned")|list|length }}
+        </p>
+    </div>
+
+    <div class="p-5 bg-white rounded-xl shadow border border-blue-100">
+        <p class="text-gray-500 text-sm">Total Spent</p>
+        <p class="text-3xl font-bold text-purple-600">
+            ₹{{
+                orders | sum(attribute='total_price')
+            }}
+        </p>
+    </div>
+</div>
+
+<!-- Orders Table -->
+{% if orders %}
+<div class="overflow-x-auto">
+    <table class="min-w-full bg-white rounded-xl shadow border border-gray-200 overflow-hidden">
+        <thead class="bg-blue-600 text-white">
+            <tr>
+                <th class="py-3 px-4 text-left font-semibold">Order ID</th>
+                <th class="py-3 px-4 text-left font-semibold">Gadget</th>
+                <th class="py-3 px-4 text-left font-semibold">Dates</th>
+                <th class="py-3 px-4 text-left font-semibold">Total Price</th>
+                <th class="py-3 px-4 text-left font-semibold">Status</th>
+                <th class="py-3 px-4 text-left font-semibold">Payment</th>
+                <th class="py-3 px-4 text-left font-semibold">Ordered On</th>
+            </tr>
+        </thead>
+
+        <tbody class="divide-y divide-gray-200">
+            {% for order in orders %}
+            <tr class="hover:bg-blue-50 transition">
+                <td class="py-3 px-4 font-semibold text-gray-700">#{{ order.id }}</td>
+
+                <td class="py-3 px-4">
+                    <a href="{{ url_for('gadget_detail', gadget_id=order.gadget.id) }}"
+                       class="text-blue-600 font-medium hover:underline">
+                        {{ order.gadget.name }}
+                    </a>
+                </td>
+
+                <td class="py-3 px-4 text-gray-700">
+                    {{ order.start_date.strftime('%Y-%m-%d') }} → 
+                    {{ order.end_date.strftime('%Y-%m-%d') }}
+                </td>
+
+                <td class="py-3 px-4 text-gray-900 font-bold">
+                    ₹{{ "%.2f"|format(order.total_price) }}
+                </td>
+
+                <!-- Status Badge -->
+                <td class="py-3 px-4">
+                    <span class="px-3 py-1 rounded-full text-sm font-semibold
+                        {% if order.status == 'booked' %} bg-blue-100 text-blue-700
+                        {% elif order.status == 'approved' %} bg-green-100 text-green-700
+                        {% elif order.status == 'active' %} bg-indigo-100 text-indigo-700
+                        {% elif order.status == 'delivered' %} bg-purple-100 text-purple-700
+                        {% elif order.status == 'returned' %} bg-gray-200 text-gray-700
+                        {% elif order.status == 'cancelled' %} bg-red-100 text-red-700
+                        {% endif %}">
+                        {{ order.status.capitalize() }}
+                    </span>
+                </td>
+
+                <!-- Payment Badge -->
+                <td class="py-3 px-4">
+                    <span class="px-3 py-1 rounded-full text-sm font-semibold
+                        {% if order.payment_status == 'paid' %} bg-green-100 text-green-700
+                        {% else %} bg-orange-100 text-orange-700
+                        {% endif %}">
+                        {{ order.payment_status.capitalize() }}
+                    </span>
+                </td>
+
+                <td class="py-3 px-4 text-gray-700">
+                    {{ order.created_at.strftime('%Y-%m-%d %H:%M') }}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% else %}
+<p class="text-center text-gray-500 text-lg mt-10">
+    {{ user.name }} has no rental orders yet.
+</p>
+{% endif %}
+
+<script>
+    feather.replace();
+</script>
+
+{% endblock %}

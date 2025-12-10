@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+
+{% block title %}My Wishlist{% endblock %}
+
+{% block content %}
+    <h2 class="text-2xl font-bold mb-6">My Wishlist</h2>
+
+    {% if wishlist_items %}
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+            {% for item in wishlist_items %}
+                <div class="gadget-card bg-white border border-gray-200 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden">
+                    <img src="{{ url_for('static', filename='default_gadget.png') }}" alt="{{ item.gadget.name }}" class="w-full h-48 object-cover">
+                    <div class="p-4">
+                        <h3 class="text-xl font-semibold mb-1"><a href="{{ url_for('gadget_detail', gadget_id=item.gadget.id) }}" class="text-blue-600 hover:underline">{{ item.gadget.name }}</a></h3>
+                        <p class="text-gray-600 text-sm mb-2">Category: {{ item.gadget.category }}</p>
+                        <p class="text-lg font-bold text-gray-800 mb-2">₹{{ "%.2f"|format(item.gadget.price_per_day) }}/day</p>
+                        <div class="flex space-x-2 mt-4">
+                            <a href="{{ url_for('move_to_cart', item_id=item.id) }}" class="bg-green-500 text-white px-3 py-1 rounded hover:bg-green-600 text-sm">Move to Cart</a>
+                            <a href="{{ url_for('remove_from_wishlist', item_id=item.id) }}" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 text-sm">Remove</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center text-gray-600 text-lg">Your wishlist is empty.</p>
+        <p class="text-center mt-4"><a href="{{ url_for('gadgets') }}" class="text-blue-500 hover:underline">Continue Browsing Gadgets</a></p>
+    {% endif %}
+{% endblock %}

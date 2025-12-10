@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+
+{% block title %}Payment{% endblock %}
+
+{% block content %}
+    <h2 class="text-2xl font-bold mb-6 text-center">Complete Your Payment</h2>
+
+    <h3 class="text-xl font-bold mb-6 text-center">Order Total: ₹{{ "%.2f"|format(order.total_price) }}</h3>
+
+    <form method="POST" action="{{ url_for('payment') }}" class="bg-white p-6 rounded-lg shadow-md max-w-lg mx-auto">
+        <div class="mb-6">
+            <label class="block text-gray-700 text-sm font-bold mb-2">Select Payment Method:</label>
+            <div class="mt-2 space-y-2">
+                <div>
+                    <input type="radio" id="card" name="payment_method" value="card" checked class="mr-2">
+                    <label for="card" class="text-gray-700">Credit/Debit Card</label>
+                </div>
+                <div>
+                    <input type="radio" id="upi" name="payment_method" value="upi" class="mr-2">
+                    <label for="upi" class="text-gray-700">UPI Payment (Simulated)</label>
+                </div>
+                <div>
+                    <input type="radio" id="cash_on_pickup" name="payment_method" value="cash_on_pickup" class="mr-2">
+                    <label for="cash_on_pickup" class="text-gray-700">Cash on Pickup</label>
+                </div>
+            </div>
+        </div>
+
+        <div id="card_details" class="mt-6 p-4 border border-gray-300 rounded-md bg-gray-50">
+            <h4 class="text-lg font-semibold mb-4">Card Details</h4>
+            <div class="mb-4">
+                <label for="card_number" class="block text-gray-700 text-sm font-bold mb-2">Card Number:</label>
+                <input type="text" id="card_number" name="card_number" placeholder="4242 4242 4242 4242 for success" maxlength="16" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div class="flex space-x-4 mb-4">
+                <div class="w-1/2">
+                    <label for="expiry" class="block text-gray-700 text-sm font-bold mb-2">Expiry:</label>
+                    <input type="text" id="expiry" name="expiry" placeholder="MM/YY" size="5" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+                <div class="w-1/2">
+                    <label for="cvv" class="block text-gray-700 text-sm font-bold mb-2">CVV:</label>
+                    <input type="text" id="cvv" name="cvv" placeholder="123" size="3" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                </div>
+            </div>
+        </div>
+
+        <button type="submit" class="bg-green-500 text-white px-6 py-3 rounded hover:bg-green-600 font-bold text-lg w-full mt-6">PAY ₹{{ "%.2f"|format(order.total_price) }}</button>
+    </form>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const paymentMethodRadios = document.querySelectorAll('input[name="payment_method"]');
+            const cardDetailsDiv = document.getElementById('card_details');
+
+            paymentMethodRadios.forEach(radio => {
+                radio.addEventListener('change', function() {
+                    if (this.value === 'card') {
+                        cardDetailsDiv.style.display = 'block';
+                    } else {
+                        cardDetailsDiv.style.display = 'none';
+                    }
+                });
+            });
+
+            // Initial check for card method on page load
+            if (document.getElementById('card').checked) {
+                cardDetailsDiv.style.display = 'block';
+            } else {
+                cardDetailsDiv.style.display = 'none';
+            }
+        });
+    </script>
+{% endblock %}

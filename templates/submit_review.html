@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Submit Review{% endblock %}
+
+{% block content %}
+
+<h2 class="text-3xl font-bold mb-8 text-gray-900">
+    Submit Review for 
+    <span class="text-blue-600">{{ order.gadget.name }}</span>
+</h2>
+
+<div class="bg-white p-8 rounded-xl shadow-lg border border-blue-100 max-w-3xl mx-auto">
+
+    <form method="POST" action="{{ url_for('submit_review', order_id=order.id) }}">
+
+        <!-- Star Rating -->
+        <div class="mb-6">
+            <label class="block text-gray-700 font-bold mb-3 text-lg">Rate Your Experience:</label>
+
+            <div id="star-container" class="flex space-x-2 cursor-pointer">
+                {% for i in range(1, 6) %}
+                <span class="star text-gray-300 text-4xl transition ease-in-out duration-150 transform"
+                      data-value="{{ i }}">★</span>
+                {% endfor %}
+            </div>
+
+            <input type="hidden" id="rating" name="rating" required>
+        </div>
+
+        <!-- Comment -->
+        <div class="mb-6">
+            <label for="comment" class="block text-gray-700 text-sm font-bold mb-2">Your Review:</label>
+            <textarea 
+                id="comment" 
+                name="comment" 
+                rows="5" 
+                class="w-full border border-gray-300 rounded-lg p-3 shadow-sm focus:ring-2 focus:ring-blue-400 focus:outline-none" 
+                placeholder="Share your experience..."
+            ></textarea>
+        </div>
+
+        <!-- Submit Button -->
+        <button 
+            type="submit" 
+            class="bg-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:bg-blue-700 transition">
+            Submit Review
+        </button>
+
+    </form>
+</div>
+
+<p class="mt-6 text-center">
+    <a href="{{ url_for('order_details', order_id=order.id) }}" class="text-blue-500 hover:underline">
+        ← Back to Order Details
+    </a>
+</p>
+
+<!-- ⭐ Animated Star Rating Script -->
+<script>
+    const stars = document.querySelectorAll(".star");
+    const ratingInput = document.getElementById("rating");
+
+    stars.forEach((star, index) => {
+
+        // Hover animation
+        star.addEventListener("mouseover", () => {
+            resetStars();
+            highlightStars(index);
+        });
+
+        // Remove hover effect
+        star.addEventListener("mouseout", () => {
+            resetStars();
+            if (ratingInput.value > 0) {
+                highlightStars(ratingInput.value - 1);
+            }
+        });
+
+        // Click animation
+        star.addEventListener("click", () => {
+            ratingInput.value = index + 1;
+
+            // Pop/scale animation
+            star.classList.add("scale-125");
+            setTimeout(() => star.classList.remove("scale-125"), 150);
+
+            resetStars();
+            highlightStars(index);
+        });
+    });
+
+    function highlightStars(index) {
+        for (let i = 0; i <= index; i++) {
+            stars[i].classList.add("text-yellow-400");
+            stars[i].classList.add("scale-110");
+        }
+    }
+
+    function resetStars() {
+        stars.forEach(star => {
+            star.classList.remove("text-yellow-400", "scale-110");
+            star.style.transition = "transform 0.15s, color 0.2s";
+        });
+    }
+</script>
+
+{% endblock %}
