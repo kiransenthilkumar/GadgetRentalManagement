@@ -4,18 +4,23 @@
 
 {% block content %}
 
-<!-- Header -->
-<div class="flex items-center justify-between mb-6">
-    <h2 class="text-3xl font-bold text-gray-800">
-        User Feedback Management
-    </h2>
+<!-- PAGE HEADER -->
+<div class="mb-8 flex items-center justify-between">
+    <div>
+        <h2 class="text-3xl font-bold text-gray-900">
+            User Feedback Management
+        </h2>
+        <p class="text-sm text-gray-500 mt-1">
+            View and resolve feedback submitted by users
+        </p>
+    </div>
 </div>
 
-<!-- Flash Messages -->
+<!-- FLASH MESSAGES -->
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
         {% for category, message in messages %}
-            <div class="p-4 mb-4 rounded-lg text-white
+            <div class="mb-4 px-5 py-3 rounded-lg shadow text-white
                 {% if category == 'success' %} bg-green-500
                 {% elif category == 'danger' %} bg-red-500
                 {% else %} bg-blue-500 {% endif %}">
@@ -26,17 +31,20 @@
 {% endwith %}
 
 {% if feedback_items %}
-<div class="overflow-x-auto">
-    <table class="min-w-full bg-white border border-gray-200 rounded-xl shadow">
+
+<!-- TABLE CARD -->
+<div class="bg-white rounded-2xl shadow-lg border border-gray-200 overflow-x-auto">
+
+    <table class="min-w-full text-sm">
         <thead class="bg-blue-600 text-white">
             <tr>
-                <th class="py-3 px-4 text-left">ID</th>
-                <th class="py-3 px-4 text-left">User</th>
-                <th class="py-3 px-4 text-left">Subject</th>
-                <th class="py-3 px-4 text-left">Message</th>
-                <th class="py-3 px-4 text-left">Status</th>
-                <th class="py-3 px-4 text-left">Date</th>
-                <th class="py-3 px-4 text-left">Actions</th>
+                <th class="px-5 py-3 text-left font-semibold">ID</th>
+                <th class="px-5 py-3 text-left font-semibold">User</th>
+                <th class="px-5 py-3 text-left font-semibold">Subject</th>
+                <th class="px-5 py-3 text-left font-semibold">Message</th>
+                <th class="px-5 py-3 text-left font-semibold">Status</th>
+                <th class="px-5 py-3 text-left font-semibold">Date</th>
+                <th class="px-5 py-3 text-left font-semibold">Action</th>
             </tr>
         </thead>
 
@@ -45,45 +53,68 @@
             {% for item in feedback_items %}
             <tr class="hover:bg-blue-50 transition">
 
-                <td class="py-3 px-4 font-semibold">{{ item.id }}</td>
-
-                <td class="py-3 px-4">
-                    <p class="text-blue-700 font-semibold">{{ item.user.name }}</p>
-                    <p class="text-sm text-gray-500">{{ item.user.email }}</p>
+                <!-- ID -->
+                <td class="px-5 py-4 font-semibold text-gray-800">
+                    {{ item.id }}
                 </td>
 
-                <td class="py-3 px-4 font-medium">{{ item.subject }}</td>
+                <!-- USER -->
+                <td class="px-5 py-4">
+                    <p class="font-semibold text-blue-700">
+                        {{ item.user.name }}
+                    </p>
+                    <p class="text-xs text-gray-500">
+                        {{ item.user.email }}
+                    </p>
+                </td>
 
-                <!-- Message Expand -->
-                <td class="py-3 px-4 max-w-xs text-gray-700">
-                    <details>
-                        <summary class="cursor-pointer text-blue-600 hover:underline">View Message</summary>
-                        <p class="mt-2 p-3 bg-gray-100 rounded-lg">{{ item.message }}</p>
+                <!-- SUBJECT -->
+                <td class="px-5 py-4 font-medium text-gray-800">
+                    {{ item.subject }}
+                </td>
+
+                <!-- MESSAGE -->
+                <td class="px-5 py-4 max-w-xs text-gray-700">
+                    <details class="group">
+                        <summary class="cursor-pointer text-blue-600 hover:underline font-medium">
+                            View Message
+                        </summary>
+                        <div class="mt-2 p-3 bg-gray-100 rounded-lg text-sm">
+                            {{ item.message }}
+                        </div>
                     </details>
                 </td>
 
-                <td class="py-3 px-4">
-                    <span class="px-3 py-1 rounded-full text-sm font-semibold
+                <!-- STATUS -->
+                <td class="px-5 py-4">
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold
                         {% if item.status == 'pending' %}
                             bg-orange-100 text-orange-700
                         {% else %}
                             bg-green-100 text-green-700
-                        {% endif %}">
+                        {% endif %}
+                    ">
                         {{ item.status.capitalize() }}
                     </span>
                 </td>
 
-                <td class="py-3 px-4">{{ item.created_at.strftime('%Y-%m-%d %H:%M') }}</td>
+                <!-- DATE -->
+                <td class="px-5 py-4 text-gray-600">
+                    {{ item.created_at.strftime('%Y-%m-%d %H:%M') }}
+                </td>
 
-                <td class="py-3 px-4">
+                <!-- ACTION -->
+                <td class="px-5 py-4">
                     {% if item.status == 'pending' %}
                         <a href="{{ url_for('admin_resolve_feedback', feedback_id=item.id) }}"
                            onclick="return confirm('Mark this feedback as resolved?');"
                            class="text-blue-600 font-semibold hover:underline">
-                           Resolve
+                            Resolve
                         </a>
                     {% else %}
-                        <span class="text-gray-500 font-medium">Resolved</span>
+                        <span class="text-gray-500 font-medium">
+                            Resolved
+                        </span>
                     {% endif %}
                 </td>
 
@@ -92,10 +123,18 @@
 
         </tbody>
     </table>
+
 </div>
 
 {% else %}
-<p class="text-center text-gray-500 text-lg mt-10">No feedback submitted yet.</p>
+
+<!-- EMPTY STATE -->
+<div class="mt-16 text-center">
+    <p class="text-gray-500 text-lg">
+        No feedback submitted yet.
+    </p>
+</div>
+
 {% endif %}
 
 {% endblock %}

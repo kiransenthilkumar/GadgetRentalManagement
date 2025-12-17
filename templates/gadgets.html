@@ -62,7 +62,9 @@
             {% for gadget in gadgets %}
                 <div class="gadget-card bg-white border border-gray-200 rounded-xl shadow-md hover:shadow-xl transition overflow-hidden flex flex-col">
                     <div class="relative">
-                        <img src="{{ url_for('static', filename=gadget.image) if gadget.image else url_for('static', filename='default_gadget.png') }}" alt="{{ gadget.name }}" class="w-full h-44 object-cover">
+                        <img src="{{ url_for('static', filename=gadget.image) if gadget.image else url_for('static', filename='default_gadget.png') }}" 
+                             alt="{{ gadget.name }}" 
+                             class="w-full h-44 object-cover">
                         <!-- {% if gadget.is_featured %}
                         <span class="absolute top-2 left-2 px-2 py-1 rounded-full bg-yellow-400 text-xs font-semibold text-gray-900 shadow">
                             ⭐

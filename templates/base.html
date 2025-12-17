@@ -13,69 +13,79 @@
     <script src="https://unpkg.com/feather-icons"></script>
 </head>
 
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-100 font-sans text-gray-800">
 
-    <!-- BLUE THEME NAVBAR -->
-    <nav class="bg-gradient-to-r from-blue-600 to-blue-500 px-4 sm:px-6 py-3 sm:py-4 shadow-lg sticky top-0 z-50 text-white">
-        <div class="max-w-6xl mx-auto flex flex-wrap items-center justify-between gap-3">
+    <!-- NAVBAR -->
+    <nav class="sticky top-0 z-50 bg-gradient-to-r from-blue-600 to-blue-500 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4 text-white">
 
-            <!-- Left Section -->
-            <div class="flex items-center flex-wrap gap-3 sm:gap-6">
-                <a href="{{ url_for('home') }}" class="text-xl font-bold hover:text-blue-200 transition">
+            <!-- LEFT -->
+            <div class="flex flex-wrap items-center gap-4 sm:gap-6">
+                <a href="{{ url_for('home') }}"
+                   class="text-xl font-bold tracking-wide hover:text-blue-200 transition">
                     Gadget Rental
                 </a>
 
-                <a href="{{ url_for('gadgets') }}" class="flex items-center space-x-1 text-blue-100 hover:text-white transition">
-                    <i data-feather="grid"></i>
+                <a href="{{ url_for('gadgets') }}"
+                   class="flex items-center gap-1 text-blue-100 hover:text-white transition">
+                    <i data-feather="grid" class="w-4 h-4"></i>
                     <span>Browse</span>
                 </a>
 
                 {% if current_user.is_authenticated %}
-                <a href="{{ url_for('cart') }}" class="flex items-center space-x-1 text-blue-100 hover:text-white transition">
-                    <i data-feather="shopping-cart"></i>
+                <a href="{{ url_for('cart') }}"
+                   class="flex items-center gap-1 text-blue-100 hover:text-white transition">
+                    <i data-feather="shopping-cart" class="w-4 h-4"></i>
                     <span>Cart</span>
                 </a>
 
-                <a href="{{ url_for('wishlist') }}" class="flex items-center space-x-1 text-blue-100 hover:text-white transition">
-                    <i data-feather="heart"></i>
+                <a href="{{ url_for('wishlist') }}"
+                   class="flex items-center gap-1 text-blue-100 hover:text-white transition">
+                    <i data-feather="heart" class="w-4 h-4"></i>
                     <span>Wishlist</span>
                 </a>
 
-                <a href="{{ url_for('orders') }}" class="flex items-center space-x-1 text-blue-100 hover:text-white transition">
-                    <i data-feather="package"></i>
+                <a href="{{ url_for('orders') }}"
+                   class="flex items-center gap-1 text-blue-100 hover:text-white transition">
+                    <i data-feather="package" class="w-4 h-4"></i>
                     <span>Orders</span>
                 </a>
                 {% endif %}
             </div>
 
-            <!-- Right Section -->
-            <div class="flex items-center flex-wrap gap-3 sm:gap-6">
+            <!-- RIGHT -->
+            <div class="flex flex-wrap items-center gap-4 sm:gap-6">
                 {% if current_user.is_authenticated %}
 
-                <a href="{{ url_for('notifications') }}" class="flex items-center space-x-1 text-blue-100 hover:text-white transition">
-                    <i data-feather="bell"></i>
+                <a href="{{ url_for('notifications') }}"
+                   class="flex items-center gap-1 text-blue-100 hover:text-white transition">
+                    <i data-feather="bell" class="w-4 h-4"></i>
                     <span>Alerts</span>
                 </a>
 
-                <a href="{{ url_for('profile') }}" class="flex items-center space-x-1 text-blue-100 hover:text-white transition">
-                    <i data-feather="user"></i>
+                <a href="{{ url_for('profile') }}"
+                   class="flex items-center gap-1 text-blue-100 hover:text-white transition">
+                    <i data-feather="user" class="w-4 h-4"></i>
                     <span>Profile</span>
                 </a>
 
-                <a href="{{ url_for('logout') }}" class="flex items-center space-x-1 text-red-100 hover:text-red-300 transition">
-                    <i data-feather="log-out"></i>
+                <a href="{{ url_for('logout') }}"
+                   class="flex items-center gap-1 text-red-100 hover:text-red-300 transition font-medium">
+                    <i data-feather="log-out" class="w-4 h-4"></i>
                     <span>Logout</span>
                 </a>
 
                 {% else %}
 
-                <a href="{{ url_for('login') }}" class="flex items-center space-x-1 text-white hover:text-blue-200 transition">
-                    <i data-feather="log-in"></i>
+                <a href="{{ url_for('login') }}"
+                   class="flex items-center gap-1 text-white hover:text-blue-200 transition">
+                    <i data-feather="log-in" class="w-4 h-4"></i>
                     <span>Login</span>
                 </a>
 
-                <a href="{{ url_for('register') }}" class="flex items-center space-x-1 text-white hover:text-blue-200 transition font-semibold">
-                    <i data-feather="user-plus"></i>
+                <a href="{{ url_for('register') }}"
+                   class="flex items-center gap-1 text-white hover:text-blue-200 transition font-semibold">
+                    <i data-feather="user-plus" class="w-4 h-4"></i>
                     <span>Register</span>
                 </a>
 
@@ -84,12 +94,12 @@
         </div>
     </nav>
 
-    <!-- Flash Messages -->
-    <div class="max-w-5xl mx-auto mt-6 px-4">
+    <!-- FLASH MESSAGES -->
+    <div class="max-w-6xl mx-auto mt-6 px-4">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-            <div class="mb-4 p-4 rounded-lg shadow border
+            <div class="mb-4 px-5 py-3 rounded-lg shadow border
                 {% if category == 'success' %}
                     bg-green-100 text-green-700 border-green-300
                 {% elif category == 'danger' %}
@@ -105,15 +115,17 @@
         {% endwith %}
     </div>
 
-    <!-- Page Content Container -->
-    <div class="max-w-6xl mx-auto mt-4 sm:mt-6 px-3 sm:px-6 py-4 sm:py-6 bg-white rounded-xl shadow-lg border border-blue-100">
-        {% block content %}{% endblock %}
-    </div>
+    <!-- MAIN CONTENT -->
+    <main class="max-w-7xl mx-auto mt-4 sm:mt-6 px-3 sm:px-6">
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
 
+    <!-- ICON INIT -->
     <script>
         feather.replace();
     </script>
 
 </body>
-
 </html>

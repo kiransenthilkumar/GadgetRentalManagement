@@ -13,53 +13,76 @@
     <script src="https://unpkg.com/feather-icons"></script>
 </head>
 
-<body class="bg-gray-100 font-sans">
+<body class="bg-gray-100 font-sans text-gray-800">
 
-    <!-- Admin Navbar -->
-    <nav class="bg-gradient-to-r from-blue-600 to-blue-500 px-4 sm:px-6 py-3 sm:py-4 text-white shadow-lg">
-        <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-3">
+    <!-- ADMIN NAVBAR -->
+    <nav class="sticky top-0 z-50 bg-gradient-to-r from-blue-600 to-blue-500 shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 py-3 flex flex-wrap items-center justify-between gap-4 text-white">
 
-            <div class="flex items-center flex-wrap gap-3 sm:gap-6">
-                <a href="{{ url_for('admin_dashboard') }}" class="text-lg font-bold hover:text-blue-200">
+            <!-- LEFT NAV -->
+            <div class="flex flex-wrap items-center gap-4 sm:gap-6">
+                <a href="{{ url_for('admin_dashboard') }}"
+                   class="text-lg font-bold tracking-wide hover:text-blue-200 transition">
                     Admin Dashboard
                 </a>
 
-                <a href="{{ url_for('admin_gadgets') }}" class="hover:text-white text-blue-100">Gadget Management</a>
+                <a href="{{ url_for('admin_gadgets') }}"
+                   class="text-blue-100 hover:text-white transition">
+                    Gadget Management
+                </a>
 
-                <a href="{{ url_for('admin_orders') }}" class="hover:text-white text-blue-100">Order Management</a>
+                <a href="{{ url_for('admin_orders') }}"
+                   class="text-blue-100 hover:text-white transition">
+                    Order Management
+                </a>
 
-                <a href="{{ url_for('admin_users') }}" class="hover:text-white text-blue-100">User Management</a>
+                <a href="{{ url_for('admin_users') }}"
+                   class="text-blue-100 hover:text-white transition">
+                    User Management
+                </a>
 
-                <a href="{{ url_for('admin_coupons') }}" class="hover:text-white text-blue-100">Coupons</a>
+                <a href="{{ url_for('admin_coupons') }}"
+                   class="text-blue-100 hover:text-white transition">
+                    Coupons
+                </a>
 
-                <a href="{{ url_for('admin_reports') }}" class="hover:text-white text-blue-100">Reports</a>
+                <a href="{{ url_for('admin_reports') }}"
+                   class="text-blue-100 hover:text-white transition">
+                    Reports
+                </a>
 
-                <a href="{{ url_for('admin_feedback') }}" class="hover:text-blue-200">Feedback</a>
+                <a href="{{ url_for('admin_feedback') }}"
+                   class="text-blue-100 hover:text-white transition">
+                    Feedback
+                </a>
             </div>
 
+            <!-- RIGHT NAV -->
             <div class="flex items-center">
                 {% if current_user.is_authenticated %}
-                    <a href="{{ url_for('logout') }}" class="hover:text-red-200 text-red-100 flex items-center space-x-1">
-                        <i data-feather="log-out"></i>
-                        <span>Logout</span>
-                    </a>
+                <a href="{{ url_for('logout') }}"
+                   class="flex items-center gap-1 text-red-100 hover:text-red-300 transition font-medium">
+                    <i data-feather="log-out" class="w-4 h-4"></i>
+                    <span>Logout</span>
+                </a>
                 {% else %}
-                    <a href="{{ url_for('admin_login') }}" class="hover:text-blue-200 flex items-center space-x-1">
-                        <i data-feather="log-in"></i>
-                        <span>Admin Login</span>
-                    </a>
+                <a href="{{ url_for('admin_login') }}"
+                   class="flex items-center gap-1 hover:text-blue-200 transition">
+                    <i data-feather="log-in" class="w-4 h-4"></i>
+                    <span>Admin Login</span>
+                </a>
                 {% endif %}
             </div>
 
         </div>
     </nav>
 
-    <!-- Flash Messages -->
+    <!-- FLASH MESSAGES -->
     <div class="max-w-6xl mx-auto mt-6 px-4">
         {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <div class="mb-4 p-4 rounded-md shadow border
+                <div class="mb-4 px-5 py-3 rounded-lg shadow border
                     {% if category == 'success' %}
                         bg-green-100 text-green-700 border-green-300
                     {% elif category == 'danger' %}
@@ -75,11 +98,14 @@
         {% endwith %}
     </div>
 
-    <!-- Page Content -->
-    <div class="max-w-6xl mx-auto mt-4 sm:mt-6 px-3 sm:px-6 py-4 sm:py-6 bg-white rounded-xl shadow-lg border border-blue-100">
-        {% block content %}{% endblock %}
-    </div>
+    <!-- PAGE CONTENT -->
+    <main class="max-w-7xl mx-auto mt-4 sm:mt-6 px-3 sm:px-6">
+        <div class="bg-white rounded-2xl shadow-lg border border-gray-200 p-4 sm:p-6">
+            {% block content %}{% endblock %}
+        </div>
+    </main>
 
+    <!-- ICON INIT -->
     <script>
         feather.replace();
     </script>

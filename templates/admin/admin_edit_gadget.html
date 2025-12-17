@@ -5,13 +5,18 @@
 {% block content %}
 
 <!-- PAGE HEADER -->
-<div class="flex items-center justify-between mb-8">
-    <h2 class="text-3xl font-bold text-gray-800">
-        Edit Gadget: <span class="text-blue-600">{{ gadget.name }}</span>
-    </h2>
+<div class="mb-10 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+    <div>
+        <h2 class="text-3xl font-bold text-gray-900">
+            Edit Gadget
+        </h2>
+        <p class="text-sm text-gray-500 mt-1">
+            Update details for <span class="font-semibold text-blue-600">{{ gadget.name }}</span>
+        </p>
+    </div>
 
     <a href="{{ url_for('admin_gadgets') }}"
-       class="text-blue-600 hover:underline font-semibold">
+       class="inline-flex items-center text-blue-600 hover:underline font-semibold">
         ← Back to Gadget Management
     </a>
 </div>
@@ -20,9 +25,9 @@
 {% with messages = get_flashed_messages(with_categories=true) %}
     {% if messages %}
         {% for category, message in messages %}
-            <div class="p-4 mb-4 rounded-lg text-white 
-                {% if category == 'success' %} bg-green-500 
-                {% elif category == 'danger' %} bg-red-500 
+            <div class="mb-4 px-5 py-3 rounded-lg text-white shadow
+                {% if category == 'success' %} bg-green-500
+                {% elif category == 'danger' %} bg-red-500
                 {% else %} bg-blue-500 {% endif %}">
                 {{ message }}
             </div>
@@ -31,99 +36,136 @@
 {% endwith %}
 
 <!-- FORM CARD -->
-<div class="bg-white p-8 rounded-xl shadow-xl border border-gray-200">
-    <form method="POST" action="{{ url_for('admin_edit_gadget', gadget_id=gadget.id) }}"
+<div class="bg-white rounded-2xl shadow-lg border border-gray-200">
+    <form method="POST"
+          action="{{ url_for('admin_edit_gadget', gadget_id=gadget.id) }}"
           enctype="multipart/form-data"
-          class="space-y-6">
+          class="p-8 space-y-8">
 
-        <!-- NAME -->
-        <div>
-            <label for="name" class="block font-semibold text-gray-700 mb-1">Gadget Name</label>
-            <div class="mt-3">
-                <img id="imagePreview" src="{{ url_for('static', filename=gadget.image) if gadget.image else url_for('static', filename='default_gadget.png') }}" alt="Image Preview" class="w-32 h-32 object-cover rounded-md shadow border mb-3"/>
+        <!-- BASIC INFO -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+            <!-- NAME -->
+            <div>
+                <label for="name" class="block font-semibold text-gray-700 mb-1">
+                    Gadget Name
+                </label>
+                <input type="text" id="name" name="name"
+                       value="{{ gadget.name }}"
+                       class="w-full p-3 border rounded-lg shadow-sm
+                              focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                       required>
             </div>
-            <input type="text" id="name" name="name"
-                   value="{{ gadget.name }}"
-                   class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                   required>
-        </div>
 
-        <!-- CATEGORY -->
-        <div>
-            <label for="category" class="block font-semibold text-gray-700 mb-1">Category</label>
-            <input type="text" id="category" name="category"
-                   value="{{ gadget.category }}"
-                   class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                   required>
+            <!-- CATEGORY -->
+            <div>
+                <label for="category" class="block font-semibold text-gray-700 mb-1">
+                    Category
+                </label>
+                <input type="text" id="category" name="category"
+                       value="{{ gadget.category }}"
+                       class="w-full p-3 border rounded-lg shadow-sm
+                              focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                       required>
+            </div>
+
+            <!-- PRICE -->
+            <div>
+                <label for="price_per_day" class="block font-semibold text-gray-700 mb-1">
+                    Price per Day (₹)
+                </label>
+                <input type="number" id="price_per_day" name="price_per_day"
+                       value="{{ gadget.price_per_day }}"
+                       step="0.01"
+                       class="w-full p-3 border rounded-lg shadow-sm
+                              focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                       required>
+            </div>
+
+            <!-- STOCK -->
+            <div>
+                <label for="stock" class="block font-semibold text-gray-700 mb-1">
+                    Stock Available
+                </label>
+                <input type="number" id="stock" name="stock"
+                       value="{{ gadget.stock }}"
+                       class="w-full p-3 border rounded-lg shadow-sm
+                              focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                       required>
+            </div>
         </div>
 
         <!-- DESCRIPTION -->
         <div>
-            <label for="description" class="block font-semibold text-gray-700 mb-1">Description</label>
-            <textarea id="description" name="description" rows="5"
-                      class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none">{{ gadget.description or '' }}</textarea>
-        </div>
-
-        <!-- PRICE -->
-        <div>
-            <label for="price_per_day" class="block font-semibold text-gray-700 mb-1">Price per Day (₹)</label>
-            <input type="number" id="price_per_day" name="price_per_day"
-                   value="{{ gadget.price_per_day }}"
-                   step="0.01"
-                   class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                   required>
-        </div>
-
-        <!-- STOCK -->
-        <div>
-            <label for="stock" class="block font-semibold text-gray-700 mb-1">Stock</label>
-            <input type="number" id="stock" name="stock"
-                   value="{{ gadget.stock }}"
-                   class="w-full p-3 border rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
-                   required>
-        </div>
-
-        <!-- IMAGE PREVIEW + UPLOAD -->
-        <div>
-            <label class="block font-semibold text-gray-700 mb-2">Current Image</label>
-
-            <img src="{{ url_for('static', filename=gadget.image) if gadget.image else url_for('static', filename='default_gadget.png') }}"
-                 class="w-32 h-32 object-cover rounded-md shadow mb-3 border">
-
-            <label class="block">
-                <span class="text-gray-700 font-medium">Upload New Image</span>
-                <input type="file" id="image" name="image" accept="image/*"
-                       class="mt-2 block w-full text-sm text-gray-500 
-                       file:mr-4 file:py-2 file:px-4 
-                       file:rounded-full file:border-0
-                       file:text-sm file:font-semibold
-                       file:bg-blue-50 file:text-blue-700
-                       hover:file:bg-blue-100">
+            <label for="description" class="block font-semibold text-gray-700 mb-1">
+                Description
             </label>
+            <textarea id="description" name="description" rows="5"
+                      class="w-full p-3 border rounded-lg shadow-sm
+                             focus:ring-2 focus:ring-blue-500 focus:outline-none">{{ gadget.description or '' }}</textarea>
+        </div>
+
+        <!-- IMAGE SECTION -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8 items-center">
+
+            <!-- PREVIEW -->
+            <div>
+                <label class="block font-semibold text-gray-700 mb-2">
+                    Current Image
+                </label>
+                <img id="imagePreview"
+                     src="{{ url_for('static', filename=gadget.image) if gadget.image else url_for('static', filename='default_gadget.png') }}"
+                     alt="Image Preview"
+                     class="w-40 h-40 object-cover rounded-xl border shadow-sm">
+            </div>
+
+            <!-- UPLOAD -->
+            <div>
+                <label class="block font-semibold text-gray-700 mb-2">
+                    Upload New Image
+                </label>
+                <input type="file" id="image" name="image" accept="image/*"
+                       class="block w-full text-sm text-gray-500
+                              file:mr-4 file:py-2 file:px-4
+                              file:rounded-full file:border-0
+                              file:text-sm file:font-semibold
+                              file:bg-blue-50 file:text-blue-700
+                              hover:file:bg-blue-100">
+                <p class="text-xs text-gray-500 mt-2">
+                    Leave empty to keep the existing image
+                </p>
+            </div>
         </div>
 
         <!-- ACTIVE SWITCH -->
-        <div class="flex items-center">
+        <div class="flex items-center gap-3">
             <input type="checkbox" id="is_active" name="is_active"
                    {% if gadget.is_active %}checked{% endif %}
                    class="h-5 w-5 text-blue-600 rounded border-gray-300 focus:ring-blue-500">
-            <label for="is_active" class="ml-2 font-semibold text-gray-700">Active</label>
+            <label for="is_active" class="font-semibold text-gray-700">
+                Active (visible to users)
+            </label>
         </div>
 
-        <!-- SUBMIT BUTTON -->
-        <div>
+        <!-- ACTIONS -->
+        <div class="pt-6 flex items-center gap-4">
             <button type="submit"
-                    class="bg-blue-600 text-white px-6 py-3 rounded-lg shadow hover:bg-blue-700 transition font-semibold">
+                    class="bg-blue-600 text-white px-8 py-3 rounded-lg shadow
+                           hover:bg-blue-700 transition font-semibold">
                 Update Gadget
             </button>
+
+            <a href="{{ url_for('admin_gadgets') }}"
+               class="text-gray-600 hover:underline font-medium">
+                Cancel
+            </a>
         </div>
 
     </form>
 </div>
 
-
+<!-- IMAGE PREVIEW SCRIPT -->
 <script>
-// Live image preview for Edit Gadget page – attach listener after DOM is ready
 document.addEventListener('DOMContentLoaded', function () {
     const imageInput = document.getElementById('image');
     const preview = document.getElementById('imagePreview');
@@ -138,10 +180,9 @@ document.addEventListener('DOMContentLoaded', function () {
                 preview.src = ev.target.result;
             };
             reader.readAsDataURL(file);
-        } else {
-            preview.src = "{{ url_for('static', filename='default_gadget.png') }}";
         }
     });
 });
 </script>
+
 {% endblock %}
