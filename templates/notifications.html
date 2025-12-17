@@ -4,55 +4,76 @@
 
 {% block content %}
 
-<h2 class="text-3xl font-bold mb-6 text-gray-800">My Notifications</h2>
+<div class="flex items-center justify-between mb-6 flex-wrap gap-3">
+    <div>
+        <h2 class="text-2xl sm:text-3xl font-bold text-gray-800">My Notifications</h2>
+        <p class="text-sm text-gray-500 mt-1">Stay up to date with your orders, payments, and feedback.</p>
+    </div>
+</div>
 
 {% if notifications %}
 
-<div class="space-y-4">
+<!-- Timeline-style list -->
+<div class="relative">
+    <!-- vertical line -->
+    <div class="hidden sm:block absolute left-4 top-0 bottom-0 border-l border-blue-100"></div>
 
-    {% for notification in notifications %}
-    <div class="
-        p-5 rounded-xl shadow-md border transition 
-        {% if not notification.is_read %}
-            bg-blue-50 border-blue-300 hover:bg-blue-100
-        {% else %}
-            bg-gray-50 border-gray-200 hover:bg-gray-100
-        {% endif %}
-    ">
+    <div class="space-y-4">
+        {% for notification in notifications %}
+        <div class="relative pl-0 sm:pl-12">
+            <!-- dot -->
+            <div class="hidden sm:flex absolute left-4 top-1/2 -translate-x-1/2 -translate-y-1/2 w-3 h-3 rounded-full
+                        {% if not notification.is_read %} bg-blue-500 {% else %} bg-gray-300 {% endif %}">
+            </div>
 
-        <!-- Message -->
-        <p class="text-gray-800 text-lg font-medium">
-            {{ notification.message }}
-        </p>
+            <div class="
+                p-4 sm:p-5 rounded-xl shadow-md border transition flex flex-col sm:flex-row sm:items-start gap-3
+                {% if not notification.is_read %}
+                    bg-blue-50 border-blue-300 hover:bg-blue-100
+                {% else %}
+                    bg-gray-50 border-gray-200 hover:bg-gray-100
+                {% endif %}
+            ">
+                <div class="flex-1">
+                    <!-- Message -->
+                    <p class="text-gray-800 text-base sm:text-lg font-medium">
+                        {{ notification.message }}
+                    </p>
 
-        <!-- Date -->
-        <p class="text-sm text-gray-500 mt-1">
-            {{ notification.created_at.strftime('%Y-%m-%d %H:%M') }}
-        </p>
+                    <!-- Date -->
+                    <p class="text-xs sm:text-sm text-gray-500 mt-1">
+                        {{ notification.created_at.strftime('%Y-%m-%d %H:%M') }}
+                        {% if not notification.is_read %}
+                            · <span class="text-blue-600 font-semibold uppercase text-[10px]">NEW</span>
+                        {% endif %}
+                    </p>
+                </div>
 
-        <!-- "Mark as Read" button -->
-        {% if not notification.is_read %}
-        <div class="mt-3">
-            <a href="{{ url_for('mark_notification_read', notification_id=notification.id) }}"
-               class="inline-block text-blue-700 font-semibold text-sm px-3 py-1 rounded-full
-                      border border-blue-500 hover:bg-blue-600 hover:text-white transition">
-                Mark as Read
-            </a>
+                <!-- "Mark as Read" button -->
+                {% if not notification.is_read %}
+                <div class="sm:mt-1">
+                    <a href="{{ url_for('mark_notification_read', notification_id=notification.id) }}"
+                       class="inline-flex items-center justify-center text-blue-700 font-semibold text-xs sm:text-sm px-3 py-1.5 rounded-full
+                              border border-blue-500 hover:bg-blue-600 hover:text-white transition">
+                        Mark as Read
+                    </a>
+                </div>
+                {% endif %}
+            </div>
         </div>
-        {% endif %}
-
+        {% endfor %}
     </div>
-    {% endfor %}
-
 </div>
 
 {% else %}
 
 <!-- Empty State -->
-<div class="bg-white p-10 rounded-xl border shadow-md text-center">
-    <img src="https://cdn-icons-png.flaticon.com/512/4076/4076500.png" 
-         class="w-20 mx-auto opacity-70 mb-4">
-    <p class="text-gray-600 text-lg">You have no notifications yet.</p>
+<div class="bg-white p-8 sm:p-10 rounded-xl border shadow-md text-center">
+    <div class="mx-auto mb-4 w-20 h-20 rounded-full bg-blue-50 flex items-center justify-center">
+        <i data-feather="bell" class="text-blue-500 w-8 h-8"></i>
+    </div>
+    <p class="text-gray-700 text-lg font-semibold mb-1">You’re all caught up!</p>
+    <p class="text-gray-500 text-sm">New alerts about your rentals, payments, and feedback will appear here.</p>
 </div>
 
 {% endif %}

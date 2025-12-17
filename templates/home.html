@@ -48,7 +48,7 @@
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
         {% for g in featured or [] %}
         <div class="bg-white border border-gray-200 rounded-xl shadow hover:shadow-lg transition overflow-hidden">
-            <img src="{{ url_for('static', filename='default_gadget.png') }}" 
+            <img src="{{ url_for('static', filename=g.image) if g.image else url_for('static', filename='default_gadget.png') }}" 
                  alt="{{ g.name }}" 
                  class="w-full h-44 object-cover">
 

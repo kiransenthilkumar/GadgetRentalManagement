@@ -1,0 +1,80 @@
+{% extends "admin/admin_base.html" %}
+
+{% block title %}Manage Coupons{% endblock %}
+
+{% block content %}
+
+<div class="flex items-center justify-between flex-wrap gap-3 mb-6">
+    <div>
+        <h2 class="text-2xl font-bold text-gray-900">Discount Coupons</h2>
+        <p class="text-sm text-gray-500 mt-1">
+            Create and manage promo codes that users can apply at checkout.
+        </p>
+    </div>
+    <a href="{{ url_for('admin_add_coupon') }}"
+       class="inline-flex items-center bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 text-sm font-semibold">
+        ➕ New Coupon
+    </a>
+</div>
+
+{% if coupons %}
+<div class="overflow-x-auto rounded-xl border border-gray-200 shadow-sm bg-white">
+    <table class="min-w-full text-sm">
+        <thead class="bg-gray-50 text-gray-700">
+            <tr>
+                <th class="py-3 px-4 text-left font-semibold">Code</th>
+                <th class="py-3 px-4 text-left font-semibold">Description</th>
+                <th class="py-3 px-4 text-left font-semibold">Discount</th>
+                <th class="py-3 px-4 text-left font-semibold">Usage</th>
+                <th class="py-3 px-4 text-left font-semibold">Expires</th>
+                <th class="py-3 px-4 text-left font-semibold">Status</th>
+                <th class="py-3 px-4 text-left font-semibold">Actions</th>
+            </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+            {% for c in coupons %}
+            <tr class="hover:bg-gray-50">
+                <td class="py-3 px-4 font-semibold text-gray-900">{{ c.code }}</td>
+                <td class="py-3 px-4 text-gray-700">{{ c.description or '-' }}</td>
+                <td class="py-3 px-4 text-gray-800">{{ "%.1f"|format(c.discount_percent) }}%</td>
+                <td class="py-3 px-4 text-gray-700">
+                    {{ c.times_used }}{% if c.max_uses %} / {{ c.max_uses }}{% else %} (no limit){% endif %}
+                </td>
+                <td class="py-3 px-4 text-gray-700">
+                    {% if c.expires_at %}
+                        {{ c.expires_at.strftime('%Y-%m-%d') }}
+                    {% else %}
+                        —
+                    {% endif %}
+                </td>
+                <td class="py-3 px-4">
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold
+                        {% if c.is_active %} bg-green-100 text-green-700
+                        {% else %} bg-red-100 text-red-700
+                        {% endif %}">
+                        {{ 'Active' if c.is_active else 'Inactive' }}
+                    </span>
+                </td>
+                <td class="py-3 px-4">
+                    <form action="{{ url_for('admin_toggle_coupon', coupon_id=c.id) }}" method="POST" class="inline">
+                        <button type="submit"
+                                class="text-xs font-semibold px-3 py-1 rounded-md
+                                       {% if c.is_active %} bg-yellow-100 text-yellow-800 hover:bg-yellow-200
+                                       {% else %} bg-green-100 text-green-800 hover:bg-green-200
+                                       {% endif %}">
+                            {% if c.is_active %}Deactivate{% else %}Activate{% endif %}
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<p class="text-gray-600 text-sm">No coupons created yet. Click "New Coupon" to create one.</p>
+{% endif %}
+
+{% endblock %}
+
+

@@ -29,7 +29,8 @@ class Gadget(db.Model):
     description = db.Column(db.Text)
     price_per_day = db.Column(db.Float)
     stock = db.Column(db.Integer)
-    image = db.Column(db.String(200))   # stores: uploads/file.jpg or None
+    # stores: relative path under /static, e.g. 'uploads/file.jpg' or 'default_gadget.png'
+    image = db.Column(db.String(200), default="default_gadget.png")
     is_active = db.Column(db.Boolean, default=True)
     is_featured = db.Column(db.Boolean, default=False)
     view_count = db.Column(db.Integer, default=0)
@@ -137,3 +138,18 @@ class Feedback(db.Model):
 
     def __repr__(self):
         return f"Feedback(User: {self.user_id}, Subject: {self.subject})"
+
+
+class Coupon(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(50), unique=True, nullable=False)  # e.g. WELCOME10
+    description = db.Column(db.String(200))
+    discount_percent = db.Column(db.Float, nullable=False)  # e.g. 10 for 10%
+    is_active = db.Column(db.Boolean, default=True)
+    expires_at = db.Column(db.DateTime, nullable=True)
+    max_uses = db.Column(db.Integer, nullable=True)
+    times_used = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+    def __repr__(self):
+        return f"Coupon(code={self.code}, discount={self.discount_percent}%)"

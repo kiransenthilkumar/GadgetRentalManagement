@@ -1,4 +1,9 @@
-from app import app, db
+
+# Ensure upload folder exists
+import os
+os.makedirs(os.path.join(os.path.dirname(__file__), 'static', 'uploads'), exist_ok=True)
+from app import app
+from extensions import db
 from models import User, Gadget, RentalOrder, Review, Feedback, Notification
 from werkzeug.security import generate_password_hash
 from datetime import datetime, date, timedelta
@@ -26,28 +31,39 @@ with app.app_context():
     )
 
     users = []
-    sample_names = ["Arun", "Kiran", "Siva", "Rahul", "Prakash"]
+    # 10 Tamil-style user names
+    sample_names = [
+        "Arun",
+        "Karthik",
+        "Prakash",
+        "Sathish",
+        "Vignesh",
+        "Sowmiya",
+        "Keerthana",
+        "Hariharan",
+        "Madhavan",
+        "Nandhini",
+    ]
 
     for i, name in enumerate(sample_names):
-        users.append(
-            User(
-                name=name,
-                email=f"{name.lower()}@gmail.com",
-                password=generate_password_hash("user123"),
-                phone=f"98765432{i}1",
-                is_admin=False,
-                is_verified=True,
-                address=f"{name} Home Street"
-            )
+        user = User(
+            name=name,
+            email=f"{name.lower()}@gmail.com",
+            password=generate_password_hash("user123"),
+            phone=f"98765432{i}1",
+            is_admin=False,
+            is_verified=True,
+            address=f"{name} Home Street"
         )
+        db.session.add(user)
+        users.append(user)
 
     db.session.add(admin_user)
-    db.session.add_all(users)
     db.session.commit()
     print("Users created.")
 
     # -----------------------------------------------------------
-    # 2️⃣ REAL GADGET DATA (7 each category)
+    # 2️⃣ REAL GADGET DATA (at least 10 each category where possible)
     # -----------------------------------------------------------
     real_gadgets = {
         "Cameras & Photography": [
@@ -85,6 +101,21 @@ with app.app_context():
                 "name": "Blackmagic 6K Pro",
                 "description": "Professional cinema camera for film production.",
                 "price": 2000, "stock": 2, "image": "bmpcc6k.jpg"
+            },
+            {
+                "name": "Sony ZV-E10",
+                "description": "Compact vlogging camera with interchangeable lenses.",
+                "price": 800, "stock": 6, "image": "sony_zve10.jpg"
+            },
+            {
+                "name": "Canon EOS 90D",
+                "description": "APS-C DSLR ideal for hybrid shooters.",
+                "price": 900, "stock": 4, "image": "canon_90d.jpg"
+            },
+            {
+                "name": "Instax Mini 12",
+                "description": "Fun instant camera for events and parties.",
+                "price": 250, "stock": 15, "image": "instax_mini12.jpg"
             }
         ],
 
@@ -123,6 +154,21 @@ with app.app_context():
                 "name": "Ryze Tello",
                 "description": "Entry-level learning drone.",
                 "price": 300, "stock": 12, "image": "tello.jpg"
+            },
+            {
+                "name": "Mini CineWhoop",
+                "description": "Indoor FPV cinewhoop drone.",
+                "price": 900, "stock": 2, "image": "cinewhoop.jpg"
+            },
+            {
+                "name": "DJI Avata",
+                "description": "Immersive FPV drone with stabilised footage.",
+                "price": 1600, "stock": 3, "image": "avata.jpg"
+            },
+            {
+                "name": "Industrial Survey Drone",
+                "description": "Long-range survey drone for mapping projects.",
+                "price": 2500, "stock": 1, "image": "survey_drone.jpg"
             }
         ],
 
@@ -161,6 +207,21 @@ with app.app_context():
                 "name": "Retro Console Box",
                 "description": "Emulator console with 10,000+ games.",
                 "price": 350, "stock": 5, "image": "retro_console.jpg"
+            },
+            {
+                "name": "Arcade Cabinet Mini",
+                "description": "Tabletop arcade machine with classic titles.",
+                "price": 450, "stock": 2, "image": "arcade_mini.jpg"
+            },
+            {
+                "name": "Gaming PC RTX 4070",
+                "description": "High-end desktop for 1440p competitive gaming.",
+                "price": 1300, "stock": 3, "image": "gaming_pc_4070.jpg"
+            },
+            {
+                "name": "Racing Wheel Bundle",
+                "description": "Force-feedback wheel with pedals and shifter.",
+                "price": 500, "stock": 4, "image": "racing_wheel.jpg"
             }
         ],
 
@@ -199,6 +260,21 @@ with app.app_context():
                 "name": "ThinkPad X1 Carbon",
                 "description": "Business ultrabook with long battery life.",
                 "price": 1300, "stock": 4, "image": "x1carbon.jpg"
+            },
+            {
+                "name": "Asus ROG Zephyrus G14",
+                "description": "Compact gaming laptop with powerful Ryzen CPU.",
+                "price": 1400, "stock": 3, "image": "g14.jpg"
+            },
+            {
+                "name": "MSI Creator Z16",
+                "description": "Creator laptop with colour-accurate display.",
+                "price": 1600, "stock": 2, "image": "creator_z16.jpg"
+            },
+            {
+                "name": "Lenovo Legion 5",
+                "description": "Balanced gaming laptop for students and pros.",
+                "price": 1100, "stock": 5, "image": "legion5.jpg"
             }
         ]
     }
@@ -206,24 +282,24 @@ with app.app_context():
     gadgets = []
     for category, items in real_gadgets.items():
         for item in items:
-            gadgets.append(
-                Gadget(
-                    name=item["name"],
-                    category=category,
-                    description=item["description"],
-                    price_per_day=item["price"],
-                    stock=item["stock"],
-                    image=f"/static/uploads/{item['image']}",
-                    is_active=True,
-                    is_featured=item.get("featured", False),
-                    view_count=0,
-                    rental_count=0,
-                    avg_rating=0.0,
-                    created_at=datetime.utcnow()
-                )
+            gadget = Gadget(
+                name=item["name"],
+                category=category,
+                description=item["description"],
+                price_per_day=item["price"],
+                stock=item["stock"],
+                # store relative path; missing files will fall back to default via ensure_images_valid()
+                image=f"uploads/{item['image']}",
+                is_active=True,
+                is_featured=item.get("featured", False),
+                view_count=0,
+                rental_count=0,
+                avg_rating=0.0,
+                created_at=datetime.utcnow()
             )
+            db.session.add(gadget)
+            gadgets.append(gadget)
 
-    db.session.add_all(gadgets)
     db.session.commit()
     print(f"{len(gadgets)} gadgets inserted.")
 
@@ -249,14 +325,13 @@ with app.app_context():
                 total_days=days,
                 total_price=days * gadget.price_per_day,
                 security_deposit=random.randint(500, 2000),
-                status=random.choice(["returned", "completed", "booked", "active"]),
+                status=random.choice(["returned", "booked", "active"]),
                 payment_status="paid",
                 transaction_id=f"TXN{random.randint(10000,99999)}",
                 created_at=datetime.utcnow() - timedelta(days=random.randint(2, 20))
             )
+            db.session.add(order)
             all_orders.append(order)
-
-    db.session.add_all(all_orders)
     db.session.commit()
     print("Orders created.")
 
@@ -270,20 +345,35 @@ with app.app_context():
 
     reviews = []
     for order in all_orders:
-        reviews.append(
-            Review(
-                order_id=order.id,
-                gadget_id=order.gadget_id,
-                user_id=order.user_id,
+        review = Review(
+            order_id=order.id,
+            gadget_id=order.gadget_id,
+            user_id=order.user_id,
+            rating=random.randint(3, 5),
+            comment=random.choice(comments),
+            created_at=datetime.utcnow() - timedelta(days=1)
+        )
+        db.session.add(review)
+        reviews.append(review)
+
+    # Ensure every gadget has at least one review (even if it had no orders)
+    for g in gadgets:
+        has_review = any(r.gadget_id == g.id for r in reviews)
+        if not has_review:
+            user = random.choice(users)
+            extra_review = Review(
+                order_id=None,
+                gadget_id=g.id,
+                user_id=user.id,
                 rating=random.randint(3, 5),
                 comment=random.choice(comments),
                 created_at=datetime.utcnow() - timedelta(days=1)
             )
-        )
+            db.session.add(extra_review)
+            reviews.append(extra_review)
 
-    db.session.add_all(reviews)
     db.session.commit()
-    print("Reviews added.")
+    print("Reviews added (including at least one per gadget).")
 
     # -----------------------------------------------------------
     # 5️⃣ UPDATE AVG RATING
@@ -306,18 +396,30 @@ with app.app_context():
 
     entries = []
     for i in range(5):
-        entries.append(
-            Feedback(
-                user_id=random.choice(users).id,
-                subject=f"Feedback #{i+1}",
-                message=fb_texts[i],
-                created_at=datetime.utcnow()
-            )
+        fb = Feedback(
+            user_id=random.choice(users).id,
+            subject=f"Feedback #{i+1}",
+            message=fb_texts[i],
+            created_at=datetime.utcnow()
         )
-
-    db.session.add_all(entries)
+        db.session.add(fb)
+        entries.append(fb)
     db.session.commit()
     print("Feedback entries added.")
 
-    print("\nDEMO DATA SEEDING COMPLETE!")
+    # -----------------------------------------------------------
+    # 7️⃣ NOTIFICATIONS (basic examples)
+    # -----------------------------------------------------------
+    notifs = []
+    for u in users:
+        notif = Notification(
+            user_id=u.id,
+            message="Welcome to GadgetRental! Your account is ready.",
+            created_at=datetime.utcnow()
+        )
+        db.session.add(notif)
+        notifs.append(notif)
+    db.session.commit()
+    print("Notifications added.")
 
+    print("\nDEMO DATA SEEDING COMPLETE!")

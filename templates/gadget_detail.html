@@ -9,11 +9,10 @@
     <div class="md:w-1/2">
         <h2 class="text-3xl font-bold mb-4">{{ gadget.name }}</h2>
 
-        <!-- IMAGE (dynamic: uploaded > default > fallback) -->
+        <!-- IMAGE (dynamic: uses stored relative path under /static, with default fallback) -->
         <img 
-            src="{{ gadget.image or url_for('static', filename='default_gadget.png') }}"
+            src="{{ url_for('static', filename=gadget.image) if gadget.image else url_for('static', filename='default_gadget.png') }}"
             alt="{{ gadget.name }}"
-            onerror="this.src='/static/default_gadget.png';"
             class="w-full h-80 object-cover rounded-lg shadow-md mb-6"
         >
 

@@ -14,13 +14,18 @@ app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///gadget.db'
 app.config['SECRET_KEY'] = 'your_secret_key' # Replace with a strong secret key
 
-UPLOAD_FOLDER = 'static/uploads'
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+
+UPLOAD_FOLDER = os.path.join(app.root_path, 'static', 'uploads')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif','webp'}
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 
 def allowed_file(filename):
-    return '.' in filename and \
-           filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+    if not filename:
+        return False
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# Ensure the upload folder exists
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Initialize extensions
 from extensions import db, login_manager
@@ -29,7 +34,7 @@ login_manager.init_app(app)
 login_manager.login_view = 'login'
 
 # Import models after db and login_manager are initialized
-from models import User, Gadget, CartItem, RentalOrder, Review, Wishlist, Notification, Feedback # Import Feedback model
+from models import User, Gadget, CartItem, RentalOrder, Review, Wishlist, Notification, Feedback, Coupon # Import Feedback model
 
 # Admin Required Decorator
 def admin_required(f):
@@ -49,10 +54,10 @@ def load_user(user_id):
 @app.route('/')
 def home():
     featured = Gadget.query.filter_by(is_active=True, is_featured=True) \
-                           .order_by(Gadget.created_at.desc()).limit(6).all()
+                           .order_by(Gadget.created_at.desc()).limit(9).all()
     if not featured:
         featured = Gadget.query.filter_by(is_active=True) \
-                               .order_by(Gadget.rental_count.desc()).limit(6).all()
+                               .order_by(Gadget.rental_count.desc()).limit(9).all()
     categories = [c[0] for c in db.session.query(Gadget.category).distinct()]
     return render_template('home.html', featured=featured, categories=categories)
 
@@ -146,11 +151,6 @@ def add_to_cart(gadget_id):
     db.session.commit()
     return redirect(url_for('cart'))
 
-PROMO_CODES = {
-    'WELCOME10': 0.10, # 10% discount
-    'SUMMER20': 0.20 # 20% discount
-}
-
 @app.route('/cart', methods=['GET', 'POST'])
 @login_required
 def cart():
@@ -165,15 +165,23 @@ def cart():
         total_cart_price += item.subtotal
     
     if request.method == 'POST':
-        promo_code = request.form.get('promo_code', '').upper()
-        if promo_code in PROMO_CODES:
-            discount_percentage = PROMO_CODES[promo_code]
-            discount_amount = total_cart_price * discount_percentage
-            total_cart_price -= discount_amount
-            promo_code_applied = promo_code
-            flash(f'Promo code {promo_code} applied! You saved ₹{discount_amount:.2f}.', 'success')
-        else:
-            flash('Invalid promo code.', 'danger')
+        promo_code = request.form.get('promo_code', '').upper().strip()
+        if promo_code:
+            # Look up coupon in database
+            coupon = Coupon.query.filter(db.func.upper(Coupon.code) == promo_code).first()
+
+            now = datetime.utcnow()
+            if coupon and coupon.is_active \
+               and (coupon.expires_at is None or coupon.expires_at >= now) \
+               and (coupon.max_uses is None or coupon.times_used < coupon.max_uses):
+
+                discount_percentage = (coupon.discount_percent or 0) / 100.0
+                discount_amount = total_cart_price * discount_percentage
+                total_cart_price -= discount_amount
+                promo_code_applied = coupon.code
+                flash(f'Promo code {coupon.code} applied! You saved ₹{discount_amount:.2f}.', 'success')
+            else:
+                flash('Invalid or expired promo code.', 'danger')
 
     return render_template('cart.html', cart_items=cart_items, total_cart_price=total_cart_price,
                            promo_code_applied=promo_code_applied, discount_amount=discount_amount)
@@ -893,7 +901,7 @@ def remove_from_wishlist(item_id):
     flash('Item removed from wishlist.', 'info')
     return redirect(url_for('wishlist'))
 
-@app.route('/   ')
+@app.route('/wishlist')
 @login_required
 def wishlist():
     wishlist_items = Wishlist.query.filter_by(user_id=current_user.id).all()
@@ -1220,6 +1228,68 @@ def admin_feedback():
     return render_template("admin/admin_feedback.html", feedback_items=feedback_items)
 
 
+@app.route('/admin/coupons')
+@login_required
+@admin_required
+def admin_coupons():
+    coupons = Coupon.query.order_by(Coupon.created_at.desc()).all()
+    return render_template('admin/admin_coupons.html', coupons=coupons)
+
+
+@app.route('/admin/coupons/add', methods=['GET', 'POST'])
+@login_required
+@admin_required
+def admin_add_coupon():
+    if request.method == 'POST':
+        code = request.form.get('code', '').upper().strip()
+        description = request.form.get('description')
+        discount_percent = request.form.get('discount_percent', type=float)
+        expires_at_str = request.form.get('expires_at')
+        max_uses = request.form.get('max_uses', type=int)
+
+        if not code or discount_percent is None:
+            flash('Code and discount percentage are required.', 'danger')
+            return render_template('admin/admin_add_coupon.html')
+
+        existing = Coupon.query.filter(db.func.upper(Coupon.code) == code).first()
+        if existing:
+            flash('A coupon with that code already exists.', 'danger')
+            return render_template('admin/admin_add_coupon.html')
+
+        expires_at = None
+        if expires_at_str:
+            try:
+                expires_at = datetime.strptime(expires_at_str, '%Y-%m-%d')
+            except ValueError:
+                flash('Invalid expiry date format. Use YYYY-MM-DD.', 'danger')
+                return render_template('admin/admin_add_coupon.html')
+
+        coupon = Coupon(
+            code=code,
+            description=description,
+            discount_percent=discount_percent,
+            expires_at=expires_at,
+            max_uses=max_uses or None,
+        )
+        db.session.add(coupon)
+        db.session.commit()
+        flash('Coupon created successfully.', 'success')
+        return redirect(url_for('admin_coupons'))
+
+    return render_template('admin/admin_add_coupon.html')
+
+
+@app.route('/admin/coupons/<int:coupon_id>/toggle', methods=['POST'])
+@login_required
+@admin_required
+def admin_toggle_coupon(coupon_id):
+    coupon = Coupon.query.get_or_404(coupon_id)
+    coupon.is_active = not coupon.is_active
+    db.session.commit()
+    flash(f'Coupon {coupon.code} is now {"active" if coupon.is_active else "inactive"}.', 'success')
+    return redirect(url_for('admin_coupons'))
+
+
 # ------------------------------
 # ADMIN — MARK FEEDBACK RESOLVED
 # ------------------------------
@@ -1301,7 +1371,7 @@ def admin_gadgets():
 @app.before_request
 def ensure_images_valid():
     for g in Gadget.query.all():
-        img_path = os.path.join(app.root_path, "static", g.image)
+        img_path = os.path.join(app.root_path, "static", g.image or "default_gadget.png")
         if not os.path.exists(img_path):
             g.image = "default_gadget.png"
     db.session.commit()
@@ -1382,9 +1452,9 @@ def admin_edit_gadget(gadget_id):
 
             # Delete old image (only if not default)
             if gadget.image != "default_gadget.png":
-                old_path = os.path.join(app.root_path, "static", gadget.image)
-                if os.path.exists(old_path):
-                    os.remove(old_path)
+                old_pathh = os.path.join(app.root_path, "static", gadget.image)
+                if os.path.exists(old_pathh):
+                    os.remove(old_pathh)
 
             gadget.image = new_path
 
@@ -1414,9 +1484,9 @@ def admin_toggle_featured(gadget_id):
 def admin_delete_gadget(gadget_id):
     gadget = Gadget.query.get_or_404(gadget_id)
     # Delete associated image file
-    if gadget.image and gadget.image != url_for('static', filename='default_gadget.png'):
+    if gadget.image and gadget.image != "default_gadget.png":
         try:
-            image_path = os.path.join(app.root_path, gadget.image[1:])
+            image_path = os.path.join(app.root_path, "static", gadget.image)
             if os.path.exists(image_path):
                 os.remove(image_path)
         except Exception as e:

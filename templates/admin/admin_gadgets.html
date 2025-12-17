@@ -19,10 +19,10 @@
 {% set non_featured = gadgets | rejectattr("is_featured") | list %}
 
 <!-- ====================================================== -->
-<!-- ⭐ LISTING TABLE -->
+<!-- ⭐ LISTING TABLE (Desktop & Tablet) -->
 <!-- ====================================================== -->
 
-<div class="overflow-x-auto shadow-xl rounded-xl border border-gray-200">
+<div class="overflow-x-auto shadow-xl rounded-xl border border-gray-200 hidden md:block">
     <table class="min-w-full bg-white text-sm">
         <thead class="bg-blue-600 text-white">
             <tr>
@@ -56,7 +56,8 @@
 
                 <!-- IMAGE -->
                 <td class="py-3 px-4">
-                    <img src="{{ gadget.image_url }}"
+                    <img src="{{ url_for('static', filename=gadget.image) if gadget.image else url_for('static', filename='default_gadget.png') }}"
+                         alt="{{ gadget.name }}"
                          class="w-14 h-14 object-cover rounded-lg border shadow-sm">
                 </td>
 
@@ -146,7 +147,8 @@
                 <td class="py-3 px-4 font-semibold text-gray-700">#{{ gadget.id }}</td>
 
                 <td class="py-3 px-4">
-                    <img src="{{ gadget.image_url }}"
+                    <img src="{{ url_for('static', filename=gadget.image) if gadget.image else url_for('static', filename='default_gadget.png') }}"
+                         alt="{{ gadget.name }}"
                          class="w-14 h-14 object-cover rounded-lg border shadow-sm">
                 </td>
 
@@ -217,6 +219,118 @@
 
         </tbody>
     </table>
+    </table>
+</div>
+
+<!-- ====================================================== -->
+<!-- 📱 MOBILE CARD VIEW -->
+<!-- ====================================================== -->
+<div class="md:hidden space-y-4">
+
+    <!-- Featured on mobile -->
+    {% if featured %}
+    <h3 class="text-sm font-semibold text-yellow-700">⭐ Featured Gadgets</h3>
+    {% for gadget in featured %}
+    <div class="bg-white rounded-xl shadow border border-gray-200 p-4 flex gap-4">
+        <img src="{{ url_for('static', filename=gadget.image) if gadget.image else url_for('static', filename='default_gadget.png') }}"
+             alt="{{ gadget.name }}"
+             class="w-20 h-20 object-cover rounded-lg border">
+        <div class="flex-1 space-y-1">
+            <div class="flex items-center justify-between">
+                <p class="font-semibold text-blue-700 text-sm line-clamp-2">{{ gadget.name }}</p>
+                <span class="text-xs text-gray-500">#{{ gadget.id }}</span>
+            </div>
+            <p class="text-xs text-gray-600">{{ gadget.category }}</p>
+            <p class="text-sm font-semibold text-gray-800">₹{{ '%.2f'|format(gadget.price_per_day) }}/day</p>
+            <div class="flex flex-wrap items-center gap-2 mt-1">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold
+                    {% if gadget.stock > 5 %} bg-green-100 text-green-700
+                    {% elif gadget.stock > 0 %} bg-yellow-100 text-yellow-700
+                    {% else %} bg-red-100 text-red-700
+                    {% endif %}">
+                    Stock: {{ gadget.stock }}
+                </span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold bg-yellow-100 text-yellow-700">
+                    Featured
+                </span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold
+                    {% if gadget.is_active %} bg-green-100 text-green-700
+                    {% else %} bg-red-100 text-red-700
+                    {% endif %}">
+                    {{ 'Active' if gadget.is_active else 'Inactive' }}
+                </span>
+            </div>
+            <div class="flex flex-wrap gap-3 mt-3 text-xs">
+                <a href="{{ url_for('admin_edit_gadget', gadget_id=gadget.id) }}"
+                   class="px-3 py-1 rounded bg-blue-50 text-blue-700 font-semibold">
+                    ✏ Edit
+                </a>
+                <a href="{{ url_for('admin_toggle_featured', gadget_id=gadget.id) }}"
+                   class="px-3 py-1 rounded bg-yellow-50 text-yellow-700 font-semibold">
+                    ⭐ Remove
+                </a>
+                <form action="{{ url_for('admin_delete_gadget', gadget_id=gadget.id) }}" method="POST" class="inline">
+                    <button type="submit"
+                            onclick="return confirm('Delete {{ gadget.name }}?');"
+                            class="px-3 py-1 rounded bg-red-50 text-red-700 font-semibold">
+                        🗑 Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
+    {% endif %}
+
+    <!-- Non-featured on mobile -->
+    <h3 class="text-sm font-semibold text-gray-800 mt-4">📦 All Other Gadgets</h3>
+    {% for gadget in non_featured %}
+    <div class="bg-white rounded-xl shadow border border-gray-200 p-4 flex gap-4">
+        <img src="{{ url_for('static', filename=gadget.image) if gadget.image else url_for('static', filename='default_gadget.png') }}"
+             alt="{{ gadget.name }}"
+             class="w-20 h-20 object-cover rounded-lg border">
+        <div class="flex-1 space-y-1">
+            <div class="flex items-center justify-between">
+                <p class="font-semibold text-blue-700 text-sm line-clamp-2">{{ gadget.name }}</p>
+                <span class="text-xs text-gray-500">#{{ gadget.id }}</span>
+            </div>
+            <p class="text-xs text-gray-600">{{ gadget.category }}</p>
+            <p class="text-sm font-semibold text-gray-800">₹{{ '%.2f'|format(gadget.price_per_day) }}/day</p>
+            <div class="flex flex-wrap items-center gap-2 mt-1">
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold
+                    {% if gadget.stock > 5 %} bg-green-100 text-green-700
+                    {% elif gadget.stock > 0 %} bg-yellow-100 text-yellow-700
+                    {% else %} bg-red-100 text-red-700
+                    {% endif %}">
+                    Stock: {{ gadget.stock }}
+                </span>
+                <span class="px-2 py-0.5 rounded-full text-[10px] font-semibold
+                    {% if gadget.is_active %} bg-green-100 text-green-700
+                    {% else %} bg-red-100 text-red-700
+                    {% endif %}">
+                    {{ 'Active' if gadget.is_active else 'Inactive' }}
+                </span>
+            </div>
+            <div class="flex flex-wrap gap-3 mt-3 text-xs">
+                <a href="{{ url_for('admin_edit_gadget', gadget_id=gadget.id) }}"
+                   class="px-3 py-1 rounded bg-blue-50 text-blue-700 font-semibold">
+                    ✏ Edit
+                </a>
+                <a href="{{ url_for('admin_toggle_featured', gadget_id=gadget.id) }}"
+                   class="px-3 py-1 rounded bg-yellow-50 text-yellow-700 font-semibold">
+                    ⭐ Make Featured
+                </a>
+                <form action="{{ url_for('admin_delete_gadget', gadget_id=gadget.id) }}" method="POST" class="inline">
+                    <button type="submit"
+                            onclick="return confirm('Delete {{ gadget.name }}?');"
+                            class="px-3 py-1 rounded bg-red-50 text-red-700 font-semibold">
+                        🗑 Delete
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+    {% endfor %}
 </div>
 
 {% else %}
